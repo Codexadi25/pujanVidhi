@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Admin = require('../models/Admin');
+const Payment = require('../models/Payment');
 const env = require('../config/env');
 const fail = require('../utils/httpError');
 const asyncHandler = require('../utils/asyncHandler');
@@ -280,5 +281,155 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) throw fail(404, 'Product not found');
   res.json({ success: true, message: 'Product removed successfully' });
+});
+
+// Ensure all paid users have corresponding records in Payment ledger
+const syncUserPayments = async () => {
+  try {
+    const paidUsers = await User.find({ paid: true });
+    for (const u of paidUsers) {
+      const orderId = u.orderId || ('ord_legacy_' + u._id.toString().slice(-6));
+      const exists = await Payment.findOne({ $or: [{ orderId }, { userId: u._id }] });
+      if (!exists) {
+        await Payment.create({
+          orderId,
+          paymentId: u.paymentId || ('pay_legacy_' + u._id.toString().slice(-6)),
+          userId: u._id,
+          kalyanamId: u.kalyanamId,
+          userName: u.name,
+          userEmail: u.email,
+          userPhone: u.phone,
+          amount: u.plan === 'video_kit' ? 51 : 21,
+          currency: 'INR',
+          status: 'captured',
+          plan: u.plan || 'digital_kit',
+          hasVideoAccess: Boolean(u.hasVideoAccess || u.plan === 'video_kit'),
+          diagnostics: {
+            failureCategory: 'Captured Successfully',
+            failedComponent: 'Razorpay PG & Server Verification',
+            diagnosticSummary: 'Sacred Diwali Puja Vidhi entitlement active'
+          },
+          createdAt: u.paidAt || u.createdAt || new Date()
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('Sync user payments warning:', err.message);
+  }
+};
+
+// Orders & Payments List with search & filtering
+exports.getOrders = asyncHandler(async (req, res) => {
+  await syncUserPayments();
+  const { q, status, page = 1, limit = 50 } = req.query;
+  const query = {};
+
+  if (q && q.trim()) {
+    const term = q.trim();
+    const regex = new RegExp(term, 'i');
+    query.$or = [
+      { orderId: regex },
+      { paymentId: regex },
+      { kalyanamId: regex },
+      { userName: regex },
+      { userEmail: regex },
+      { userPhone: regex }
+    ];
+  }
+
+  if (status && status !== 'all') {
+    query.status = status;
+  }
+
+  const skip = (Math.max(1, parseInt(page)) - 1) * parseInt(limit);
+  const total = await Payment.countDocuments(query);
+  const orders = await Payment.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  res.json({
+    orders,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / parseInt(limit))
+  });
+});
+
+// Lifeline Diagnostic Hub Investigation
+exports.getLifeline = asyncHandler(async (req, res) => {
+  await syncUserPayments();
+  const { q } = req.query;
+  if (!q || !q.trim()) {
+    throw fail(400, 'Search query required (Order ID, Email, Phone, Txn ID, or Kalyanam ID)');
+  }
+
+  const term = q.trim();
+  const regex = new RegExp(term, 'i');
+
+  // Search across Payment and User records
+  const payment = await Payment.findOne({
+    $or: [
+      { orderId: regex },
+      { paymentId: regex },
+      { kalyanamId: regex },
+      { userEmail: regex },
+      { userPhone: regex }
+    ]
+  }).sort({ createdAt: -1 });
+
+  const user = await User.findOne({
+    $or: [
+      { email: regex },
+      { phone: regex },
+      { kalyanamId: regex },
+      { orderId: regex },
+      { paymentId: regex }
+    ]
+  });
+
+  if (!payment && !user) {
+    throw fail(404, `No records found matching identifier: "${term}"`);
+  }
+
+  res.json({
+    success: true,
+    investigation: {
+      searchTerm: term,
+      payment: payment || null,
+      user: user || null,
+      diagnostics: payment?.diagnostics || {
+        failureCategory: user?.paid ? 'Captured Successfully' : 'Payment Incomplete',
+        failedComponent: user?.paid ? 'None' : 'Payment Gateway / User Action',
+        diagnosticSummary: user?.paid
+          ? 'Devotee has active verified access.'
+          : 'User registered but no successful payment captured.'
+      }
+    }
+  });
+});
+
+// Update User Plan
+exports.updateUserPlan = asyncHandler(async (req, res) => {
+  const { plan, hasVideoAccess } = req.body;
+  const user = await User.findById(req.params.id);
+  if (!user) throw fail(404, 'User not found');
+
+  if (plan) user.plan = plan;
+  if (hasVideoAccess !== undefined) {
+    user.hasVideoAccess = Boolean(hasVideoAccess);
+  } else if (plan) {
+    user.hasVideoAccess = plan === 'video_kit';
+  }
+  await user.save();
+  res.json({ success: true, user });
+});
+
+// Delete User
+exports.deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) throw fail(404, 'User not found');
+  await Payment.deleteMany({ userId: req.params.id });
+  res.json({ success: true, message: 'User and associated records removed' });
 });
 

@@ -1,207 +1,390 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PoojanVidhi - Backend Administration Portal</title>
-  <link rel="icon" type="image/svg+xml" href="https://poojanvidhi.web.app/images/mandala.svg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoojanVidhi Server Control Center | Backend Admin & Lifeline Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="https://poojanvidhi.web.app/images/mandala.svg">
   <style>
     :root {
-      --bg: #0f0404;
-      --card-bg: rgba(28, 9, 8, 0.95);
-      --card-border: rgba(217, 168, 82, 0.3);
+      --bg-base: #0c0404;
+      --bg-surface: #140606;
+      --bg-card: #1c0a09;
+      --bg-card-hover: #260f0d;
+      --bg-elevated: #220c0a;
+      --bg-input: #100303;
+      --border-subtle: rgba(217, 168, 82, 0.2);
+      --border-strong: rgba(217, 168, 82, 0.4);
+      --border-focus: #d9a852;
       --gold: #d9a852;
       --gold-light: #fbe2aa;
-      --text: #f5ebe6;
+      --gold-dark: #b8860b;
+      --text-main: #f8fafc;
       --text-muted: #bda395;
+      --text-faint: #7d6558;
       --crimson: #7a1230;
-      --success: #2e7d32;
-      --danger: #c62828;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.15);
+      --emerald-text: #34d399;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --danger-text: #f87171;
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.15);
+      --amber-text: #fbbf24;
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.15);
+      --blue-text: #60a5fa;
+      --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-brand: 'Cinzel', serif;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background: radial-gradient(circle at top, #2b0e0c 0%, #0d0303 100%);
-      color: var(--text);
+      background: radial-gradient(circle at top right, #240b09 0%, var(--bg-base) 100%);
+      color: var(--text-main);
+      font-family: var(--font-main);
       min-height: 100vh;
       line-height: 1.5;
-      padding-bottom: 40px;
     }
-    header {
-      background: rgba(18, 5, 5, 0.9);
-      border-bottom: 1px solid var(--card-border);
-      padding: 16px 24px;
+
+    /* Toast Container */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 10px;
-      text-decoration: none;
+    }
+    .toast {
+      background: #2b0e0c;
+      border: 1px solid var(--gold);
       color: var(--gold-light);
-      font-family: 'Cinzel', serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-    .brand-mark {
-      font-size: 1.6rem;
-      color: var(--gold);
-    }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
+      padding: 12px 20px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.15s ease;
-      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.2s ease forwards;
     }
-    .btn-gold {
-      background: linear-gradient(135deg, #d9a852 0%, #b8860b 100%);
-      color: #1a0505;
-    }
-    .btn-gold:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--card-border);
-      color: var(--gold-light);
-    }
-    .btn-outline:hover { background: rgba(217, 168, 82, 0.1); border-color: var(--gold); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 4px 10px; font-size: 11px; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    .container {
-      max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 20px;
+    /* Login Screen */
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
-
-    /* Login Overlay */
-    .login-container {
-      max-width: 420px;
-      margin: 80px auto;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
       border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
       padding: 36px 30px;
       text-align: center;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
     }
-    .login-container h2 {
-      font-family: 'Cinzel', serif;
-      color: var(--gold-light);
+    .auth-logo {
+      font-size: 2.5rem;
+      color: var(--gold);
       margin-bottom: 8px;
     }
-    .login-container p {
+    .auth-title {
+      font-family: var(--font-brand);
+      color: var(--gold-light);
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+    .auth-subtitle {
       color: var(--text-muted);
       font-size: 13px;
       margin-bottom: 24px;
     }
     .form-group {
-      margin-bottom: 20px;
       text-align: left;
+      margin-bottom: 18px;
     }
     .form-group label {
       display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--gold);
-      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      color: var(--gold);
+      margin-bottom: 6px;
     }
-    .input-control {
+    .form-input, .form-textarea, .form-select {
       width: 100%;
-      padding: 12px 14px;
-      background: #120404;
-      border: 1px solid rgba(217, 168, 82, 0.4);
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
       border-radius: 8px;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
+      font-family: inherit;
       outline: none;
       transition: border-color 0.2s;
     }
-    .input-control:focus { border-color: var(--gold); }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--border-focus);
+    }
 
-    /* Dashboard UI */
-    .stats-grid {
-      display: grid;
-      grid-templateColumns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 30px;
-    }
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
+    /* Main App Layout */
+    .admin-app {
       display: flex;
-      flexDirection: column;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      min-height: 100vh;
     }
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+
+    /* Sidebar Navigation (Exact Strivers Style) */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
     }
-    .stat-value {
-      font-size: 1.8rem;
+    .sidebar-brand {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-brand-mark {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--crimson), #260505);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--gold);
+    }
+    .sidebar-brand-title {
+      font-family: var(--font-brand);
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--gold-light);
-      margin: 8px 0 4px;
+      line-height: 1.2;
     }
-    .stat-sub { font-size: 12px; color: #8c6a58; }
+    .sidebar-brand-sub {
+      font-size: 10px;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
 
-    /* Section Tabs */
-    .tabs-nav {
+    .nav-menu {
+      padding: 16px 12px;
+      flex: 1;
       display: flex;
-      gap: 12px;
-      border-bottom: 1px solid var(--card-border);
-      margin-bottom: 24px;
+      flex-direction: column;
+      gap: 6px;
     }
-    .tab-btn {
-      padding: 10px 18px;
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 8px;
       background: transparent;
       border: none;
-      border-bottom: 2px solid transparent;
       color: var(--text-muted);
+      font-size: 13px;
       font-weight: 600;
-      font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s;
+      text-decoration: none;
+      transition: all 0.15s;
     }
-    .tab-btn.active {
+    .nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-item:hover {
+      background: rgba(217, 168, 82, 0.08);
       color: var(--gold-light);
-      border-bottom-color: var(--gold);
+    }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(217, 168, 82, 0.18) 0%, rgba(217, 168, 82, 0.04) 100%);
+      color: var(--gold-light);
+      border-left: 3px solid var(--gold);
+    }
+    .nav-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* Data Table */
-    .table-container {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Topbar Strip (Exact Strivers Style) */
+    .topbar {
+      background: rgba(18, 5, 5, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .topbar-telemetry {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .telemetry-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .telemetry-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: #1a0505;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(217, 168, 82, 0.25);
+    }
+    .btn-gold:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border-subtle);
+      color: var(--gold-light);
+    }
+    .btn-outline:hover {
+      background: rgba(217, 168, 82, 0.08);
+      border-color: var(--gold);
+    }
+    .btn-danger {
+      background: var(--danger-bg);
+      border-color: var(--danger);
+      color: var(--danger-text);
+    }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+    /* Page Panes */
+    .page-pane {
+      padding: 28px;
+      flex: 1;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-title {
+      font-family: var(--font-brand);
+      font-size: 1.4rem;
+      color: var(--gold-light);
+    }
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Metric Cards */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .stat-card-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .stat-card-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin: 6px 0 2px;
+    }
+    .stat-card-sub { font-size: 11px; color: var(--text-faint); }
+
+    /* Tables & Lists */
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
       border-radius: 12px;
       overflow-x: auto;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     }
     table {
       width: 100%;
@@ -210,236 +393,560 @@
       font-size: 13px;
     }
     th {
-      background: rgba(15, 3, 3, 0.8);
+      background: rgba(14, 4, 4, 0.85);
       color: var(--gold);
-      padding: 14px 16px;
+      padding: 12px 16px;
       font-weight: 700;
       letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border-subtle);
       white-space: nowrap;
     }
     td {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(217, 168, 82, 0.12);
-      color: var(--text);
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(217, 168, 82, 0.1);
+      color: var(--text-main);
       white-space: nowrap;
     }
-    tr:hover td { background: rgba(217, 168, 82, 0.04); }
-    .badge-paid {
-      display: inline-block;
+    tr:hover td { background: rgba(217, 168, 82, 0.03); }
+
+    /* Badges & Copyable Chips (Exact Strivers Style) */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 3px 8px;
-      background: rgba(46, 125, 50, 0.2);
-      border: 1px solid #4caf50;
-      color: #a5d6a7;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
     }
-    .badge-unpaid {
-      display: inline-block;
-      padding: 3px 8px;
-      background: rgba(198, 40, 40, 0.2);
-      border: 1px solid #ef5350;
-      color: #ef9a9a;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .badge-plan {
-      display: inline-block;
-      padding: 3px 8px;
-      background: rgba(217, 168, 82, 0.15);
-      border: 1px solid var(--gold);
-      color: var(--gold-light);
+    .badge-success { background: var(--emerald-bg); color: var(--emerald-text); border: 1px solid var(--emerald); }
+    .badge-failed { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger); }
+    .badge-warning { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber); }
+    .badge-plan { background: rgba(217, 168, 82, 0.15); color: var(--gold-light); border: 1px solid var(--gold); border-radius: 6px; }
+
+    .copyable-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 7px;
       border-radius: 6px;
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .kid-tag {
-      font-family: monospace;
-      font-weight: 700;
-      color: #d9a852;
-    }
-    .banner-client {
+    .copyable-chip:hover {
+      border-color: var(--gold);
       background: rgba(217, 168, 82, 0.1);
-      border: 1px dashed var(--gold);
-      border-radius: 10px;
-      padding: 14px 20px;
+    }
+    .copyable-chip:active { transform: scale(0.96); }
+
+    /* Lifeline Investigation Card (Exact Strivers Lifeline Hub) */
+    .lifeline-search-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .lifeline-result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.5);
+    }
+    .diagnostics-banner {
+      background: rgba(16, 185, 129, 0.12);
+      border-left: 4px solid var(--emerald);
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .diagnostics-banner.failed {
+      background: rgba(239, 68, 68, 0.12);
+      border-left-color: var(--danger);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
-      gap: 16px;
-      flex-wrap: wrap;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
     }
+    .modal-title {
+      font-family: var(--font-brand);
+      color: var(--gold-light);
+      font-size: 1.25rem;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation Header -->
-  <header>
-    <a href="/" class="brand">
-      <span class="brand-mark">ॐ</span>
-      <span>PoojanVidhi <small style="font-size: 11px; color: var(--gold); font-family: sans-serif; font-weight: normal; margin-left: 6px;">[BACKEND CONTROL PORTAL]</small></span>
-    </a>
-    <div class="header-actions">
-      <a href="https://poojanvidhi.web.app/" target="_blank" class="btn btn-outline">
-        🌐 Open Client Website
-      </a>
-      <button id="changePassBtn" class="btn btn-outline hidden" onclick="openChangePasswordModal()">
-        🔑 Change Password
-      </button>
-      <button id="logoutBtn" class="btn btn-outline hidden" onclick="handleLogout()">
-        Logout
-      </button>
-    </div>
-  </header>
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Login Card (Shown if not logged in) -->
-  <div id="loginView" class="container">
-    <div class="login-container">
-      <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">🔐</span>
-      <h2>Admin Authentication</h2>
-      <p>Enter the secure master passkey to access the backend administration dashboard.</p>
+  <!-- AUTHENTICATION SCREEN -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">ॐ</div>
+      <h1 class="auth-title">PoojanVidhi Server Control</h1>
+      <p class="auth-subtitle">Backend Administration & Lifeline Investigation Hub</p>
       
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <form id="authForm" onsubmit="handleAdminLogin(event)">
         <div class="form-group">
-          <label for="adminKeyInput">Admin Master Passkey</label>
-          <input type="password" id="adminKeyInput" class="input-control" placeholder="Enter admin passkey..." required autofocus />
+          <label for="adminKeyInput">Master Admin Passkey</label>
+          <input type="password" id="adminKeyInput" class="form-input" placeholder="Enter admin password..." required autofocus />
         </div>
-        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 12px;">
-          Unlock Backend Dashboard →
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 12px; font-size: 13px;">
+          Authenticate & Unlock Control Center →
         </button>
       </form>
-      <div id="loginError" style="margin-top: 14px; font-size: 12px; color: #ef5350;" class="hidden"></div>
-      <div style="margin-top: 20px; font-size: 12px; color: var(--text-muted);">
-        Server Status: <span style="color: #4caf50; font-weight: 700;">Online (Render Platform)</span>
+      <div id="authError" style="margin-top: 14px; font-size: 12px; color: var(--danger-text);" class="hidden"></div>
+      <div style="margin-top: 24px; font-size: 11px; color: var(--text-faint);">
+        Connected to MongoDB Atlas • Live on Render
       </div>
     </div>
   </div>
 
-  <!-- Authenticated Dashboard View -->
-  <div id="dashboardView" class="container hidden">
-    <!-- Quick Notice Banner -->
-    <div class="banner-client">
-      <div>
-        <strong style="color: var(--gold-light);">🌐 Production Architecture Notice:</strong>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
-          Backend API is actively running at <code style="color: var(--gold);">https://pujanvidhi.onrender.com/</code> and serving live data to frontend <code style="color: var(--gold);">https://poojanvidhi.web.app/</code>.
-        </p>
+  <!-- MAIN ADMIN DASHBOARD GUI -->
+  <div id="adminApp" class="admin-app hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-mark">ॐ</div>
+        <div>
+          <div class="sidebar-brand-title">PoojanVidhi</div>
+          <div class="sidebar-brand-sub">CONTROL CENTER</div>
+        </div>
       </div>
-      <button class="btn btn-gold btn-sm" onclick="fetchDashboardData()">
-        ↻ Refresh Stats
-      </button>
-    </div>
 
-    <!-- Metric Stat Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-label">👥 Total Devotees</span>
-        <div id="statTotalUsers" class="stat-value">--</div>
-        <span class="stat-sub">Registered families</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">💳 Paid Members</span>
-        <div id="statPaidUsers" class="stat-value">--</div>
-        <span class="stat-sub">Active Puja Vidhi licenses</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">💰 Gross Revenue</span>
-        <div id="statRevenue" class="stat-value">--</div>
-        <span class="stat-sub">Razorpay verified sales</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">📦 Active Products</span>
-        <div id="statProducts" class="stat-value">--</div>
-        <span class="stat-sub">Dynamic catalog items</span>
-      </div>
-    </div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="pricing" onclick="switchAdminTab('pricing')">
+          <div class="nav-item-left">
+            <span>💰</span>
+            <span>Pricing & Products</span>
+          </div>
+          <span class="nav-pill badge-warning">LIVE</span>
+        </button>
 
-    <!-- Tabs -->
-    <div class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('users', event)">Devotees & Orders</button>
-      <button class="tab-btn" onclick="switchTab('products', event)">Catalog & Pricing</button>
-    </div>
+        <button class="nav-item" data-tab="users" onclick="switchAdminTab('users')">
+          <div class="nav-item-left">
+            <span>👥</span>
+            <span>Devotees & Users</span>
+          </div>
+          <span class="nav-pill badge-plan" id="navUserCount">--</span>
+        </button>
 
-    <!-- Tab 1: Users & Devotees -->
-    <div id="tabUsers">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="color: var(--gold-light); font-size: 1.1rem;">Registered Devotees & Access Controls</h3>
-        <input type="text" id="userSearch" class="input-control" placeholder="Search by name, email or Kalyanam ID..." style="max-width: 320px; padding: 8px 12px; font-size: 12px;" oninput="filterUsers()" />
-      </div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Devotee Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Kalyanam ID</th>
-              <th>Selected Plan</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading devotee records...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <button class="nav-item" data-tab="orders" onclick="switchAdminTab('orders')">
+          <div class="nav-item-left">
+            <span>📦</span>
+            <span>Orders & Payments</span>
+          </div>
+          <span class="nav-pill badge-success" id="navOrderCount">--</span>
+        </button>
 
-    <!-- Tab 2: Products & Dynamic Pricing -->
-    <div id="tabProducts" class="hidden">
-      <h3 style="color: var(--gold-light); font-size: 1.1rem; margin-bottom: 14px;">Dynamic Puja Products</h3>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Badge</th>
-              <th>Current Price</th>
-              <th>Original Price</th>
-              <th>Video Access</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="productsTableBody">
-            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading product catalog...</td></tr>
-          </tbody>
-        </table>
+        <button class="nav-item" data-tab="lifeline" onclick="switchAdminTab('lifeline')">
+          <div class="nav-item-left">
+            <span>⚡</span>
+            <span>Lifeline Hub</span>
+          </div>
+          <span class="nav-pill badge-plan" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6;">DIAGNOSTICS</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div style="margin-bottom: 8px;">
+          <a href="https://poojanvidhi.web.app/" target="_blank" class="btn btn-outline" style="width: 100%; justify-content: center;">
+            🌐 Open Client Website
+          </a>
+        </div>
+        <div style="text-align: center; font-size: 11px; color: var(--text-faint);">
+          PoojanVidhi v2.6 • Render + Atlas
+        </div>
       </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Telemetry Strip -->
+      <header class="topbar">
+        <div class="topbar-telemetry">
+          <div class="telemetry-item">
+            <span class="telemetry-dot"></span>
+            <span>Server: <strong>Online (Render)</strong></span>
+          </div>
+          <div class="telemetry-item">
+            <span>MongoDB: <strong style="color: var(--emerald-text);">Atlas Connected</strong></span>
+          </div>
+          <div class="telemetry-item">
+            <span>Revenue: <strong id="topRevenue" style="color: var(--gold-light);">₹--</strong></span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-outline" onclick="openChangePassModal()">
+            🔑 Change Password
+          </button>
+          <button class="btn btn-outline" onclick="handleAdminLogout()">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- TAB 1: PRICING & PRODUCTS -->
+      <section id="panePricing" class="page-pane">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Pricing & Product Catalog</h2>
+            <p class="page-subtitle">Configure real-time prices, sacred guides, video masterclasses, and product features.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline" onclick="loadPricingTab()">↻ Refresh</button>
+            <button class="btn btn-gold" onclick="openAddProductModal()">+ Add New Product</button>
+          </div>
+        </div>
+
+        <div class="stats-strip">
+          <div class="stat-card">
+            <div class="stat-card-label">Active Products</div>
+            <div id="statActiveProducts" class="stat-card-value">--</div>
+            <div class="stat-card-sub">Published to client store</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Total Revenue</div>
+            <div id="statTotalRevenue" class="stat-card-value">₹--</div>
+            <div class="stat-card-sub">From verified user orders</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Badge</th>
+                <th>Price (₹)</th>
+                <th>Original Price (₹)</th>
+                <th>Content Access</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading product catalog...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: DEVOTEES & ACCESS CONTROL -->
+      <section id="paneUsers" class="page-pane hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Devotee Access Management</h2>
+            <p class="page-subtitle">Search registered families, verify Kalyanam IDs, and manage puja document & video entitlements.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="userSearchInput" class="form-input" placeholder="Search by Name, Email, Phone, Kalyanam ID..." style="width: 320px;" oninput="handleUserSearch()" />
+            <select id="userStatusFilter" class="form-select" style="width: 140px;" onchange="handleUserSearch()">
+              <option value="all">All Devotees</option>
+              <option value="paid">Paid Only</option>
+              <option value="pending">Pending Only</option>
+            </select>
+            <button class="btn btn-outline" onclick="loadUsersTab()">↻</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Devotee Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Kalyanam ID</th>
+                <th>Selected Plan</th>
+                <th>Access Status</th>
+                <th>Registration Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading devotee records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: ORDERS & PAYMENTS (With Click-to-Copy) -->
+      <section id="paneOrders" class="page-pane hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Orders & Payment Transactions</h2>
+            <p class="page-subtitle">Live Razorpay payment ledger. Click any ID to copy to clipboard.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="orderSearchInput" class="form-input" placeholder="Search Order ID, Txn ID, Devotee..." style="width: 280px;" oninput="handleOrderSearch()" />
+            <select id="orderStatusFilter" class="form-select" style="width: 140px;" onchange="handleOrderSearch()">
+              <option value="all">All Statuses</option>
+              <option value="captured">Captured (Success)</option>
+              <option value="created">Created (Pending)</option>
+              <option value="failed">Failed</option>
+            </select>
+            <button class="btn btn-outline" onclick="loadOrdersTab()">↻</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Payment / Txn ID</th>
+                <th>Devotee</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Plan Type</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading payment transactions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 4: LIFELINE INVESTIGATION HUB (Exact Strivers Lifeline) -->
+      <section id="paneLifeline" class="page-pane hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">⚡ Lifeline Hub & Diagnostics</h2>
+            <p class="page-subtitle">Universal payment investigation and failure root cause diagnostics.</p>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="lifeline-search-card">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gold); margin-bottom: 8px;">
+            INVESTIGATE ORDER, DEVOTEE, OR PAYMENT RECORD
+          </label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="lifelineInput" class="form-input" placeholder="Enter Order ID (order_...), Payment ID (pay_...), Kalyanam ID (KLY...), or Email..." style="font-size: 14px;" onkeypress="if(event.key==='Enter') executeLifelineSearch()" />
+            <button class="btn btn-gold" onclick="executeLifelineSearch()" style="padding: 10px 24px;">
+              🔍 Investigate
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Area -->
+        <div id="lifelineResults" class="hidden">
+          <div class="lifeline-result-card">
+            <!-- Diagnostics Banner -->
+            <div id="lifelineBanner" class="diagnostics-banner">
+              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase;" id="lifelineCategory">--</div>
+              <div style="font-size: 15px; font-weight: 700; margin: 4px 0;" id="lifelineComponent">--</div>
+              <div style="font-size: 13px; color: var(--text-muted);" id="lifelineSummary">--</div>
+            </div>
+
+            <!-- Details Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+              <div>
+                <h4 style="color: var(--gold); font-size: 13px; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+                  📋 Identifiers (Click to Copy)
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+                  <div>Order ID: <span id="lifeOrderId" class="copyable-chip" onclick="copyText(this.textContent, 'Order ID')">--</span></div>
+                  <div>Payment ID: <span id="lifePaymentId" class="copyable-chip" onclick="copyText(this.textContent, 'Payment ID')">--</span></div>
+                  <div>Kalyanam ID: <span id="lifeKalyanamId" class="copyable-chip" onclick="copyText(this.textContent, 'Kalyanam ID')">--</span></div>
+                </div>
+              </div>
+
+              <div>
+                <h4 style="color: var(--gold); font-size: 13px; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+                  👤 Devotee Profile
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                  <div>Name: <strong id="lifeName" style="color: var(--gold-light);">--</strong></div>
+                  <div>Email: <span id="lifeEmail">--</span></div>
+                  <div>Phone: <span id="lifePhone">--</span></div>
+                  <div>Entitlement: <span id="lifeEntitlement" class="badge">--</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: ADD PRODUCT -->
+  <div id="addProductModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">+ Add New Puja Product</h3>
+        <button class="modal-close" onclick="closeAddProductModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateProduct(event)">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="addProdName" class="form-input" placeholder="e.g. Poojan Vidhi Kit" required />
+        </div>
+        <div class="form-group">
+          <label>Subtitle / Description</label>
+          <input type="text" id="addProdSub" class="form-input" placeholder="e.g. Complete Diwali Lakshmi-Ganesh Puja Digital Guide" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Current Price (₹)</label>
+            <input type="number" id="addProdPrice" class="form-input" placeholder="21" required min="1" />
+          </div>
+          <div class="form-group">
+            <label>Original Price (₹)</label>
+            <input type="number" id="addProdOrig" class="form-input" placeholder="199" min="0" />
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Badge Label</label>
+            <input type="text" id="addProdBadge" class="form-input" placeholder="e.g. Essential Guide" />
+          </div>
+          <div class="form-group">
+            <label>Plan Type</label>
+            <select id="addProdType" class="form-select">
+              <option value="digital_kit">Digital Kit (Document)</option>
+              <option value="video_kit">Video Kit (HD Video + Doc)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Features List (One feature per line)</label>
+          <textarea id="addProdFeatures" class="form-textarea" rows="4" placeholder="Step-by-step Lakshmi-Ganesh Vidhi&#10;Sacred Mantras&#10;Samagri Checklist"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddProductModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Publish Product</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Change Password Modal -->
-  <div id="changePassModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 100%; max-width: 420px; padding: 28px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 1.2rem;">🔑 Change Admin Password</h3>
-        <button onclick="closeChangePasswordModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+  <!-- MODAL: EDIT PRODUCT -->
+  <div id="editProductModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Product</h3>
+        <button class="modal-close" onclick="closeEditProductModal()">&times;</button>
       </div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
-        Update your master admin password. This will be hashed with bcrypt and saved directly to the MongoDB database.
-      </p>
-      <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+      <form onsubmit="handleUpdateProduct(event)">
+        <input type="hidden" id="editProdId" />
         <div class="form-group">
-          <label for="currPassInput">Current Password</label>
-          <input type="password" id="currPassInput" class="input-control" placeholder="Current passkey..." required />
+          <label>Product Name</label>
+          <input type="text" id="editProdName" class="form-input" required />
         </div>
         <div class="form-group">
-          <label for="newPassInput">New Password (min 6 characters)</label>
-          <input type="password" id="newPassInput" class="input-control" placeholder="New password..." required minlength="6" />
+          <label>Subtitle</label>
+          <input type="text" id="editProdSub" class="form-input" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Current Price (₹)</label>
+            <input type="number" id="editProdPrice" class="form-input" required min="1" />
+          </div>
+          <div class="form-group">
+            <label>Original Price (₹)</label>
+            <input type="number" id="editProdOrig" class="form-input" min="0" />
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Badge</label>
+            <input type="text" id="editProdBadge" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Active Status</label>
+            <select id="editProdActive" class="form-select">
+              <option value="true">Active (Visible)</option>
+              <option value="false">Hidden (Draft)</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label for="confirmPassInput">Confirm New Password</label>
-          <input type="password" id="confirmPassInput" class="input-control" placeholder="Confirm new password..." required minlength="6" />
+          <label>Features (One per line)</label>
+          <textarea id="editProdFeatures" class="form-textarea" rows="4"></textarea>
         </div>
-        <div id="changePassMsg" style="margin-bottom: 14px; font-size: 13px; font-weight: 600;" class="hidden"></div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeEditProductModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CHANGE MASTER PASSWORD -->
+  <div id="changePassModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔑 Change Admin Password</h3>
+        <button class="modal-close" onclick="closeChangePassModal()">&times;</button>
+      </div>
+      <form onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="currPassInput" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label>New Password (min 6 characters)</label>
+          <input type="password" id="newPassInput" class="form-input" required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPassInput" class="form-input" required minlength="6" />
+        </div>
+        <div id="changePassMsg" style="margin-bottom: 12px; font-size: 12px;" class="hidden"></div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" class="btn btn-outline" onclick="closeChangePasswordModal()">Cancel</button>
+          <button type="button" class="btn btn-outline" onclick="closeChangePassModal()">Cancel</button>
           <button type="submit" class="btn btn-gold">Save to MongoDB</button>
         </div>
       </form>
@@ -447,101 +954,57 @@
   </div>
 
   <script>
-    let allUsers = [];
     let currentAdminKey = sessionStorage.getItem('pv_admin_key') || localStorage.getItem('pv_admin_key') || '';
+    let cachedProducts = [];
+    let cachedUsers = [];
+    let cachedOrders = [];
 
-    // Check login state on page load
+    // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       if (currentAdminKey) {
-        showDashboard();
+        showApp();
       } else {
-        showLogin();
+        showAuth();
       }
     });
 
-    function showLogin() {
-      document.getElementById('loginView').classList.remove('hidden');
-      document.getElementById('dashboardView').classList.add('hidden');
-      document.getElementById('logoutBtn').classList.add('hidden');
-      document.getElementById('changePassBtn').classList.add('hidden');
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<span>✓</span><span>${escapeHtml(msg)}</span>`;
+      container.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(20px)';
+        setTimeout(() => t.remove(), 200);
+      }, 2500);
     }
 
-    function showDashboard() {
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('dashboardView').classList.remove('hidden');
-      document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('changePassBtn').classList.remove('hidden');
-      fetchDashboardData();
+    function copyText(text, label = 'Text') {
+      if (!text || text === '--') return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`${label} copied to clipboard!`);
+      });
     }
 
-    function openChangePasswordModal() {
-      document.getElementById('currPassInput').value = '';
-      document.getElementById('newPassInput').value = '';
-      document.getElementById('confirmPassInput').value = '';
-      const msgEl = document.getElementById('changePassMsg');
-      msgEl.className = 'hidden';
-      msgEl.textContent = '';
-      document.getElementById('changePassModal').classList.remove('hidden');
+    function showAuth() {
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.getElementById('adminApp').classList.add('hidden');
     }
 
-    function closeChangePasswordModal() {
-      document.getElementById('changePassModal').classList.add('hidden');
+    function showApp() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('adminApp').classList.remove('hidden');
+      loadPricingTab();
+      loadUsersTab();
+      loadOrdersTab();
     }
 
-    async function handleChangePassword(e) {
-      e.preventDefault();
-      const currentPassword = document.getElementById('currPassInput').value.trim();
-      const newPassword = document.getElementById('newPassInput').value.trim();
-      const confirmPassword = document.getElementById('confirmPassInput').value.trim();
-      const msgEl = document.getElementById('changePassMsg');
-      msgEl.className = '';
-
-      if (newPassword !== confirmPassword) {
-        msgEl.style.color = '#ef5350';
-        msgEl.textContent = 'New passwords do not match';
-        return;
-      }
-      if (newPassword.length < 6) {
-        msgEl.style.color = '#ef5350';
-        msgEl.textContent = 'Password must be at least 6 characters long';
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/v1/admin/change-password', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': currentAdminKey
-          },
-          body: JSON.stringify({ currentPassword, newPassword })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          msgEl.style.color = '#a5d6a7';
-          msgEl.textContent = '✓ Password successfully updated and saved in MongoDB!';
-          if (data.token) {
-            currentAdminKey = data.token;
-            sessionStorage.setItem('pv_admin_key', data.token);
-            localStorage.setItem('pv_admin_key', data.token);
-          }
-          setTimeout(() => {
-            closeChangePasswordModal();
-          }, 1600);
-        } else {
-          msgEl.style.color = '#ef5350';
-          msgEl.textContent = data.message || 'Failed to update password';
-        }
-      } catch (err) {
-        msgEl.style.color = '#ef5350';
-        msgEl.textContent = 'Network error: ' + err.message;
-      }
-    }
-
-    async function handleLogin(e) {
+    async function handleAdminLogin(e) {
       e.preventDefault();
       const key = document.getElementById('adminKeyInput').value.trim();
-      const errEl = document.getElementById('loginError');
+      const errEl = document.getElementById('authError');
       errEl.classList.add('hidden');
 
       try {
@@ -552,10 +1015,10 @@
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          currentAdminKey = key;
-          sessionStorage.setItem('pv_admin_key', key);
-          localStorage.setItem('pv_admin_key', key);
-          showDashboard();
+          currentAdminKey = data.token || key;
+          sessionStorage.setItem('pv_admin_key', currentAdminKey);
+          localStorage.setItem('pv_admin_key', currentAdminKey);
+          showApp();
         } else {
           errEl.textContent = data.message || 'Invalid Master Passkey';
           errEl.classList.remove('hidden');
@@ -566,178 +1029,539 @@
       }
     }
 
-    function handleLogout() {
+    function handleAdminLogout() {
       currentAdminKey = '';
       sessionStorage.removeItem('pv_admin_key');
       localStorage.removeItem('pv_admin_key');
       document.getElementById('adminKeyInput').value = '';
-      showLogin();
+      showAuth();
     }
 
-    function switchTab(tab, e) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      if (tab === 'users') {
-        document.getElementById('tabUsers').classList.remove('hidden');
-        document.getElementById('tabProducts').classList.add('hidden');
-      } else {
-        document.getElementById('tabUsers').classList.add('hidden');
-        document.getElementById('tabProducts').classList.remove('hidden');
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('panePricing').classList.add('hidden');
+      document.getElementById('paneUsers').classList.add('hidden');
+      document.getElementById('paneOrders').classList.add('hidden');
+      document.getElementById('paneLifeline').classList.add('hidden');
+
+      if (tabName === 'pricing') {
+        document.getElementById('panePricing').classList.remove('hidden');
+        loadPricingTab();
+      } else if (tabName === 'users') {
+        document.getElementById('paneUsers').classList.remove('hidden');
+        loadUsersTab();
+      } else if (tabName === 'orders') {
+        document.getElementById('paneOrders').classList.remove('hidden');
+        loadOrdersTab();
+      } else if (tabName === 'lifeline') {
+        document.getElementById('paneLifeline').classList.remove('hidden');
       }
     }
 
-    async function fetchDashboardData() {
-      if (!currentAdminKey) return;
+    // ---------------- PRICING & PRODUCTS ----------------
+    async function loadPricingTab() {
       try {
-        // Fetch stats
-        const statsRes = await fetch('/api/v1/admin/stats', {
-          headers: { 'x-admin-key': currentAdminKey }
-        });
+        const [statsRes, prodRes] = await Promise.all([
+          fetch('/api/v1/admin/stats', { headers: { 'x-admin-key': currentAdminKey } }),
+          fetch('/api/v1/admin/products', { headers: { 'x-admin-key': currentAdminKey } })
+        ]);
+
         if (statsRes.status === 401 || statsRes.status === 403) {
-          handleLogout();
+          handleAdminLogout();
           return;
         }
+
         const stats = await statsRes.json();
-        const totalUsers = stats.totalUsers ?? stats.stats?.totalUsers ?? 0;
-        const paidUsers = stats.paidUsers ?? stats.stats?.paidUsers ?? 0;
-        const revenue = stats.estimatedRevenue ?? stats.totalRevenue ?? stats.stats?.totalRevenue ?? 0;
-        const products = stats.activeProducts ?? stats.totalProducts ?? stats.stats?.totalProducts ?? 0;
-
-        document.getElementById('statTotalUsers').textContent = totalUsers;
-        document.getElementById('statPaidUsers').textContent = paidUsers;
-        document.getElementById('statRevenue').textContent = '₹' + revenue;
-        document.getElementById('statProducts').textContent = products;
-
-        // Fetch Users
-        const usersRes = await fetch('/api/v1/admin/users', {
-          headers: { 'x-admin-key': currentAdminKey }
-        });
-        if (usersRes.status === 401 || usersRes.status === 403) {
-          handleLogout();
-          return;
-        }
-        const usersData = await usersRes.json();
-        allUsers = Array.isArray(usersData) ? usersData : (usersData.users || []);
-        renderUsers(allUsers);
-
-        // Fetch Products
-        const prodRes = await fetch('/api/v1/admin/products', {
-          headers: { 'x-admin-key': currentAdminKey }
-        });
         const prodData = await prodRes.json();
-        const productsList = Array.isArray(prodData) ? prodData : (prodData.products || []);
-        renderProducts(productsList);
+
+        const rev = stats.estimatedRevenue ?? stats.totalRevenue ?? 0;
+        document.getElementById('topRevenue').textContent = '₹' + rev;
+        document.getElementById('statTotalRevenue').textContent = '₹' + rev;
+        document.getElementById('statActiveProducts').textContent = stats.activeProducts ?? stats.totalProducts ?? 0;
+
+        cachedProducts = prodData.products || [];
+        renderProductsTable(cachedProducts);
       } catch (err) {
-        console.error('Error loading dashboard data', err);
+        console.error('Pricing tab error:', err);
       }
     }
 
-    function renderUsers(users) {
-      const tbody = document.getElementById('usersTableBody');
-      if (!users.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No registered devotees found yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = users.map(u => `
-        <tr>
-          <td><strong>${escapeHtml(u.name || 'Anonymous')}</strong></td>
-          <td>${escapeHtml(u.email || '--')}</td>
-          <td>${escapeHtml(u.phone || '--')}</td>
-          <td><span class="kid-tag">${escapeHtml(u.kalyanamId || '--')}</span></td>
-          <td><span class="badge-plan">${escapeHtml(u.plan || 'digital_kit')}</span></td>
-          <td>
-            <span class="${u.hasPaid ? 'badge-paid' : 'badge-unpaid'}">
-              ${u.hasPaid ? 'Paid & Verified' : 'Pending'}
-            </span>
-          </td>
-          <td>
-            <button class="btn btn-outline btn-sm" onclick="toggleUserPaid('${u._id}')">
-              ${u.hasPaid ? 'Revoke Access' : 'Grant Paid Access'}
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function filterUsers() {
-      const q = document.getElementById('userSearch').value.toLowerCase();
-      const filtered = allUsers.filter(u => 
-        (u.name && u.name.toLowerCase().includes(q)) ||
-        (u.email && u.email.toLowerCase().includes(q)) ||
-        (u.kalyanamId && u.kalyanamId.toLowerCase().includes(q))
-      );
-      renderUsers(filtered);
-    }
-
-    async function toggleUserPaid(userId) {
-      if (!confirm('Toggle paid access for this user?')) return;
-      try {
-        const res = await fetch(\`/api/v1/admin/users/\${userId}/toggle-paid\`, {
-          method: 'PUT',
-          headers: { 'x-admin-key': currentAdminKey }
-        });
-        const data = await res.json();
-        if (data.success) {
-          fetchDashboardData();
-        } else {
-          alert(data.message || 'Action failed');
-        }
-      } catch (err) {
-        alert('Request failed: ' + err.message);
-      }
-    }
-
-    function renderProducts(products) {
+    function renderProductsTable(products) {
       const tbody = document.getElementById('productsTableBody');
       if (!products.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No products found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No products found.</td></tr>';
         return;
       }
-
       tbody.innerHTML = products.map(p => `
         <tr>
-          <td><strong>${escapeHtml(p.name)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(p.subtitle || '')}</small></td>
-          <td><span style="font-size: 11px; color: var(--gold);">${escapeHtml(p.badge || '--')}</span></td>
-          <td><strong style="color: var(--gold-light); font-size: 1.1rem;">₹${p.price}</strong></td>
-          <td style="color: var(--text-muted); text-decoration: line-through;">₹${p.origPrice || '--'}</td>
-          <td>${p.hasVideoAccess ? '✅ HD Video Included' : '📖 Document Only'}</td>
-          <td><span class="${p.isActive ? 'badge-paid' : 'badge-unpaid'}">${p.isActive ? 'Active' : 'Hidden'}</span></td>
           <td>
-            <button class="btn btn-gold btn-sm" onclick="updateProductPricePrompt('${p._id}', ${p.price})">
-              Edit Price (₹)
-            </button>
+            <strong>${escapeHtml(p.name)}</strong>
+            <br><small style="color: var(--text-muted);">${escapeHtml(p.subtitle || '')}</small>
+          </td>
+          <td><span style="color: var(--gold); font-size: 11px;">${escapeHtml(p.badge || '--')}</span></td>
+          <td><strong style="color: var(--gold-light); font-size: 1.15rem;">₹${p.price}</strong></td>
+          <td style="color: var(--text-faint); text-decoration: line-through;">₹${p.origPrice || '--'}</td>
+          <td>${p.hasVideoAccess ? '🎬 HD Video + Vidhi' : '📖 Sacred Kit Only'}</td>
+          <td><span class="badge ${p.isActive ? 'badge-success' : 'badge-failed'}">${p.isActive ? 'Active' : 'Draft'}</span></td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-outline btn-sm" onclick="openEditProductModal('${p._id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="handleDeleteProduct('${p._id}')">Delete</button>
+            </div>
           </td>
         </tr>
       `).join('');
     }
 
-    async function updateProductPricePrompt(productId, oldPrice) {
-      const newPriceStr = prompt('Enter new price in Rupees (₹):', oldPrice);
-      if (newPriceStr === null) return;
-      const newPrice = Number(newPriceStr);
-      if (isNaN(newPrice) || newPrice < 0) {
-        alert('Please enter a valid price amount');
-        return;
-      }
+    // Add Product Modal
+    function openAddProductModal() {
+      document.getElementById('addProdName').value = '';
+      document.getElementById('addProdSub').value = '';
+      document.getElementById('addProdPrice').value = '';
+      document.getElementById('addProdOrig').value = '';
+      document.getElementById('addProdBadge').value = '';
+      document.getElementById('addProdFeatures').value = '';
+      document.getElementById('addProductModal').classList.remove('hidden');
+    }
+    function closeAddProductModal() {
+      document.getElementById('addProductModal').classList.add('hidden');
+    }
+
+    async function handleCreateProduct(e) {
+      e.preventDefault();
+      const body = {
+        name: document.getElementById('addProdName').value.trim(),
+        subtitle: document.getElementById('addProdSub').value.trim(),
+        price: Number(document.getElementById('addProdPrice').value),
+        origPrice: Number(document.getElementById('addProdOrig').value || 0),
+        badge: document.getElementById('addProdBadge').value.trim(),
+        type: document.getElementById('addProdType').value,
+        hasVideoAccess: document.getElementById('addProdType').value === 'video_kit',
+        features: document.getElementById('addProdFeatures').value.split('\n').filter(Boolean)
+      };
 
       try {
-        const res = await fetch(\`/api/v1/admin/products/\${productId}\`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': currentAdminKey
-          },
-          body: JSON.stringify({ price: newPrice })
+        const res = await fetch('/api/v1/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': currentAdminKey },
+          body: JSON.stringify(body)
         });
         const data = await res.json();
-        if (data.success) {
-          fetchDashboardData();
+        if (res.ok && data.success) {
+          showToast('Product published successfully!');
+          closeAddProductModal();
+          loadPricingTab();
         } else {
-          alert(data.message || 'Failed to update price');
+          alert(data.message || 'Error creating product');
         }
       } catch (err) {
         alert('Network error: ' + err.message);
+      }
+    }
+
+    // Edit Product Modal
+    function openEditProductModal(id) {
+      const p = cachedProducts.find(item => item._id === id);
+      if (!p) return;
+      document.getElementById('editProdId').value = p._id;
+      document.getElementById('editProdName').value = p.name || '';
+      document.getElementById('editProdSub').value = p.subtitle || '';
+      document.getElementById('editProdPrice').value = p.price;
+      document.getElementById('editProdOrig').value = p.origPrice || 0;
+      document.getElementById('editProdBadge').value = p.badge || '';
+      document.getElementById('editProdActive').value = p.isActive ? 'true' : 'false';
+      document.getElementById('editProdFeatures').value = (p.features || []).join('\n');
+      document.getElementById('editProductModal').classList.remove('hidden');
+    }
+    function closeEditProductModal() {
+      document.getElementById('editProductModal').classList.add('hidden');
+    }
+
+    async function handleUpdateProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('editProdId').value;
+      const body = {
+        name: document.getElementById('editProdName').value.trim(),
+        subtitle: document.getElementById('editProdSub').value.trim(),
+        price: Number(document.getElementById('editProdPrice').value),
+        origPrice: Number(document.getElementById('editProdOrig').value || 0),
+        badge: document.getElementById('editProdBadge').value.trim(),
+        isActive: document.getElementById('editProdActive').value === 'true',
+        features: document.getElementById('editProdFeatures').value.split('\n').filter(Boolean)
+      };
+
+      try {
+        const res = await fetch(`/api/v1/admin/products/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': currentAdminKey },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Product updated successfully!');
+          closeEditProductModal();
+          loadPricingTab();
+        } else {
+          alert(data.message || 'Error updating product');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function handleDeleteProduct(id) {
+      if (!confirm('Are you sure you want to permanently delete this product?')) return;
+      try {
+        const res = await fetch(`/api/v1/admin/products/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Product deleted');
+          loadPricingTab();
+        } else {
+          alert(data.message || 'Failed to delete product');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // ---------------- DEVOTEES & USERS ----------------
+    async function loadUsersTab() {
+      try {
+        const res = await fetch('/api/v1/admin/users?limit=100', {
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        cachedUsers = data.users || [];
+        document.getElementById('navUserCount').textContent = cachedUsers.length;
+        renderUsersTable(cachedUsers);
+      } catch (err) {
+        console.error('Users load error:', err);
+      }
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('usersTableBody');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No devotee records found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : '--';
+        return `
+          <tr>
+            <td><strong>${escapeHtml(u.name || 'Anonymous')}</strong></td>
+            <td>${escapeHtml(u.email || '--')}</td>
+            <td>${escapeHtml(u.phone || '--')}</td>
+            <td>
+              <span class="copyable-chip" onclick="copyText('${escapeHtml(u.kalyanamId || '')}', 'Kalyanam ID')">
+                ${escapeHtml(u.kalyanamId || '--')}
+              </span>
+            </td>
+            <td>
+              <select class="form-select" style="padding: 2px 6px; font-size: 11px;" onchange="handleUserPlanChange('${u._id}', this.value)">
+                <option value="digital_kit" ${u.plan === 'digital_kit' ? 'selected' : ''}>Digital Kit</option>
+                <option value="video_kit" ${u.plan === 'video_kit' ? 'selected' : ''}>Video Kit (HD)</option>
+              </select>
+            </td>
+            <td>
+              <span class="badge ${u.paid || u.hasPaid ? 'badge-success' : 'badge-failed'}">
+                ${u.paid || u.hasPaid ? 'Active & Paid' : 'Pending'}
+              </span>
+            </td>
+            <td style="color: var(--text-faint); font-size: 11px;">${dateStr}</td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm" onclick="handleTogglePaid('${u._id}')">
+                  ${u.paid || u.hasPaid ? 'Revoke' : 'Grant Paid'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="handleDeleteUser('${u._id}')">✕</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleUserSearch() {
+      const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
+      const status = document.getElementById('userStatusFilter').value;
+
+      const filtered = cachedUsers.filter(u => {
+        const matchesQ = !q ||
+          (u.name && u.name.toLowerCase().includes(q)) ||
+          (u.email && u.email.toLowerCase().includes(q)) ||
+          (u.phone && u.phone.toLowerCase().includes(q)) ||
+          (u.kalyanamId && u.kalyanamId.toLowerCase().includes(q));
+
+        const isPaid = Boolean(u.paid || u.hasPaid);
+        const matchesStatus = status === 'all' || (status === 'paid' && isPaid) || (status === 'pending' && !isPaid);
+
+        return matchesQ && matchesStatus;
+      });
+
+      renderUsersTable(filtered);
+    }
+
+    async function handleTogglePaid(userId) {
+      try {
+        const res = await fetch(`/api/v1/admin/users/${userId}/toggle-paid`, {
+          method: 'PUT',
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Devotee access updated!');
+          loadUsersTab();
+          loadPricingTab();
+        } else {
+          alert(data.message || 'Failed to toggle access');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function handleUserPlanChange(userId, newPlan) {
+      try {
+        const res = await fetch(`/api/v1/admin/users/${userId}/plan`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': currentAdminKey },
+          body: JSON.stringify({ plan: newPlan, hasVideoAccess: newPlan === 'video_kit' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`Plan updated to ${newPlan}!`);
+        } else {
+          alert(data.message || 'Failed to update plan');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function handleDeleteUser(userId) {
+      if (!confirm('Permanently delete this devotee account?')) return;
+      try {
+        const res = await fetch(`/api/v1/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Devotee record deleted');
+          loadUsersTab();
+        } else {
+          alert(data.message || 'Failed to delete');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // ---------------- ORDERS & PAYMENTS ----------------
+    async function loadOrdersTab() {
+      try {
+        const res = await fetch('/api/v1/admin/orders?limit=100', {
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        cachedOrders = data.orders || [];
+        document.getElementById('navOrderCount').textContent = cachedOrders.length;
+        renderOrdersTable(cachedOrders);
+      } catch (err) {
+        console.error('Orders load error:', err);
+      }
+    }
+
+    function renderOrdersTable(orders) {
+      const tbody = document.getElementById('ordersTableBody');
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No transactions recorded yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = orders.map(o => {
+        const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--';
+        const statusBadge = o.status === 'captured' ? 'badge-success' : (o.status === 'failed' ? 'badge-failed' : 'badge-warning');
+        return `
+          <tr>
+            <td>
+              <span class="copyable-chip" onclick="copyText('${escapeHtml(o.orderId)}', 'Order ID')">
+                ${escapeHtml(o.orderId)}
+              </span>
+            </td>
+            <td>
+              <span class="copyable-chip" onclick="copyText('${escapeHtml(o.paymentId || '')}', 'Payment ID')">
+                ${escapeHtml(o.paymentId || '--')}
+              </span>
+            </td>
+            <td>
+              <strong>${escapeHtml(o.userName || 'Devotee')}</strong>
+              <br><small style="color: var(--text-muted);">${escapeHtml(o.userEmail || '')}</small>
+            </td>
+            <td><strong style="color: var(--gold-light);">₹${o.amount}</strong></td>
+            <td><span class="badge ${statusBadge}">${escapeHtml(o.status)}</span></td>
+            <td><span class="badge-plan">${escapeHtml(o.plan || 'digital_kit')}</span></td>
+            <td style="color: var(--text-faint); font-size: 11px;">${dateStr}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="investigateOrderDirect('${escapeHtml(o.orderId)}')">
+                ⚡ Lifeline
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleOrderSearch() {
+      const q = document.getElementById('orderSearchInput').value.toLowerCase().trim();
+      const status = document.getElementById('orderStatusFilter').value;
+
+      const filtered = cachedOrders.filter(o => {
+        const matchesQ = !q ||
+          (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+          (o.paymentId && o.paymentId.toLowerCase().includes(q)) ||
+          (o.userName && o.userName.toLowerCase().includes(q)) ||
+          (o.userEmail && o.userEmail.toLowerCase().includes(q)) ||
+          (o.kalyanamId && o.kalyanamId.toLowerCase().includes(q));
+
+        const matchesStatus = status === 'all' || o.status === status;
+        return matchesQ && matchesStatus;
+      });
+
+      renderOrdersTable(filtered);
+    }
+
+    // ---------------- LIFELINE INVESTIGATION HUB ----------------
+    function investigateOrderDirect(orderId) {
+      switchAdminTab('lifeline');
+      document.getElementById('lifelineInput').value = orderId;
+      executeLifelineSearch();
+    }
+
+    async function executeLifelineSearch() {
+      const q = document.getElementById('lifelineInput').value.trim();
+      const resultsEl = document.getElementById('lifelineResults');
+      if (!q) {
+        alert('Please enter an identifier to investigate');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/admin/lifeline?q=${encodeURIComponent(q)}`, {
+          headers: { 'x-admin-key': currentAdminKey }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const inv = data.investigation;
+          const p = inv.payment;
+          const u = inv.user;
+          const d = inv.diagnostics;
+
+          // Banner
+          const banner = document.getElementById('lifelineBanner');
+          const isSuccess = (p && p.status === 'captured') || (u && (u.paid || u.hasPaid));
+          banner.className = isSuccess ? 'diagnostics-banner' : 'diagnostics-banner failed';
+
+          document.getElementById('lifelineCategory').textContent = d.failureCategory || (isSuccess ? 'Payment Captured' : 'Incomplete / Pending');
+          document.getElementById('lifelineComponent').textContent = d.failedComponent || (isSuccess ? 'Razorpay PG & MongoDB Verification' : 'User Payment Flow');
+          document.getElementById('lifelineSummary').textContent = d.diagnosticSummary || (isSuccess ? 'Devotee has active verified access.' : 'Awaiting payment capture.');
+
+          // Identifiers
+          document.getElementById('lifeOrderId').textContent = p?.orderId || u?.orderId || '--';
+          document.getElementById('lifePaymentId').textContent = p?.paymentId || u?.paymentId || '--';
+          document.getElementById('lifeKalyanamId').textContent = p?.kalyanamId || u?.kalyanamId || '--';
+
+          // User info
+          document.getElementById('lifeName').textContent = u?.name || p?.userName || 'Anonymous Devotee';
+          document.getElementById('lifeEmail').textContent = u?.email || p?.userEmail || '--';
+          document.getElementById('lifePhone').textContent = u?.phone || p?.userPhone || '--';
+
+          const entBadge = document.getElementById('lifeEntitlement');
+          if (isSuccess) {
+            entBadge.className = 'badge badge-success';
+            entBadge.textContent = `Active (${u?.plan || p?.plan || 'Vidhi Kit'})`;
+          } else {
+            entBadge.className = 'badge badge-failed';
+            entBadge.textContent = 'Unpaid / Inactive';
+          }
+
+          resultsEl.classList.remove('hidden');
+        } else {
+          alert(data.message || 'No records found matching this identifier');
+          resultsEl.classList.add('hidden');
+        }
+      } catch (err) {
+        alert('Investigation request failed: ' + err.message);
+      }
+    }
+
+    // ---------------- MASTER PASSWORD MODAL ----------------
+    function openChangePassModal() {
+      document.getElementById('currPassInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmPassInput').value = '';
+      const msg = document.getElementById('changePassMsg');
+      msg.className = 'hidden';
+      document.getElementById('changePassModal').classList.remove('hidden');
+    }
+    function closeChangePassModal() {
+      document.getElementById('changePassModal').classList.add('hidden');
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const currentPassword = document.getElementById('currPassInput').value.trim();
+      const newPassword = document.getElementById('newPassInput').value.trim();
+      const confirmPassword = document.getElementById('confirmPassInput').value.trim();
+      const msg = document.getElementById('changePassMsg');
+      msg.className = '';
+
+      if (newPassword !== confirmPassword) {
+        msg.style.color = 'var(--danger-text)';
+        msg.textContent = 'New passwords do not match';
+        return;
+      }
+      if (newPassword.length < 6) {
+        msg.style.color = 'var(--danger-text)';
+        msg.textContent = 'Password must be at least 6 characters';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/admin/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': currentAdminKey },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          msg.style.color = 'var(--emerald-text)';
+          msg.textContent = '✓ Password saved directly to MongoDB!';
+          if (data.token) {
+            currentAdminKey = data.token;
+            sessionStorage.setItem('pv_admin_key', data.token);
+            localStorage.setItem('pv_admin_key', data.token);
+          }
+          setTimeout(() => {
+            closeChangePassModal();
+            showToast('Admin password updated successfully');
+          }, 1500);
+        } else {
+          msg.style.color = 'var(--danger-text)';
+          msg.textContent = data.message || 'Incorrect password';
+        }
+      } catch (err) {
+        msg.style.color = 'var(--danger-text)';
+        msg.textContent = 'Network error: ' + err.message;
       }
     }
 

@@ -25,6 +25,12 @@ r.get('/admin/stats', admin, adm.getStats);
 r.get('/admin/users', admin, adm.getUsers);
 r.get('/admin/users/:id', admin, adm.getUserDetails);
 r.put('/admin/users/:id/toggle-paid', admin, adm.toggleUserPaid);
+r.put('/admin/users/:id/plan', admin, adm.updateUserPlan);
+r.delete('/admin/users/:id', admin, adm.deleteUser);
+
+// Admin Orders & Lifeline Diagnostics
+r.get('/admin/orders', admin, adm.getOrders);
+r.get('/admin/lifeline', admin, adm.getLifeline);
 
 // Admin Product Management
 r.get('/admin/products', admin, adm.getProducts);
