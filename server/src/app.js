@@ -26,6 +26,7 @@ app.use(express.json());
 // Direct Admin API Router - supports /admin/login, /admin/stats, /admin/users, /admin/products directly
 const adminApiRouter = express.Router();
 adminApiRouter.post('/login', adm.login);
+adminApiRouter.post('/change-password', admin, adm.changePassword);
 adminApiRouter.get('/stats', admin, adm.getStats);
 adminApiRouter.get('/users', admin, adm.getUsers);
 adminApiRouter.get('/users/:id', admin, adm.getUserDetails);

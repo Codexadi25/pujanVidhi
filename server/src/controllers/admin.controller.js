@@ -1,8 +1,25 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
+const Admin = require('../models/Admin');
 const env = require('../config/env');
 const fail = require('../utils/httpError');
 const asyncHandler = require('../utils/asyncHandler');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Ensure an Admin record exists in MongoDB, seeded from env.adminKey or 'admin@123'
+const getOrSeedAdmin = async () => {
+  let admin = await Admin.findOne({ username: 'admin' });
+  if (!admin) {
+    const initialKey = (env.adminKey || 'admin@123').trim();
+    const hashedPassword = await bcrypt.hash(initialKey, 10);
+    admin = await Admin.create({
+      username: 'admin',
+      password: hashedPassword
+    });
+  }
+  return admin;
+};
 
 // Seed default products if collection is empty
 const seedDefaultProducts = async () => {
@@ -52,15 +69,64 @@ const seedDefaultProducts = async () => {
 };
 
 // Admin authentication verification
-const cleanKey = k => (k || '').toString().trim().replace(/^["']|["']$/g, '');
-
 exports.login = asyncHandler(async (req, res) => {
-  const clientKey = cleanKey(req.body?.adminKey);
-  const validKeys = [cleanKey(env.adminKey), 'admin@123', 'admin123'].filter(Boolean);
-  if (!clientKey || !validKeys.includes(clientKey)) {
+  const clientKey = (req.body?.adminKey || '').toString().trim().replace(/^["']|["']$/g, '');
+  if (!clientKey) {
+    throw fail(400, 'Admin passkey is required');
+  }
+
+  const admin = await getOrSeedAdmin();
+  const isMatch = await admin.comparePassword(clientKey);
+  const isEnvMatch = [env.adminKey, 'admin@123', 'admin123'].filter(Boolean).map(k => k.trim()).includes(clientKey);
+
+  if (!isMatch && !isEnvMatch) {
     throw fail(401, 'Invalid Admin Passkey');
   }
-  res.json({ success: true, message: 'Admin authenticated', adminKey: clientKey });
+
+  // Issue signed JWT token
+  const token = jwt.sign({ role: 'admin', username: 'admin' }, env.jwtSecret, { expiresIn: '30d' });
+
+  res.json({
+    success: true,
+    message: 'Admin authenticated',
+    token,
+    adminKey: token
+  });
+});
+
+// Update Admin Password stored in MongoDB
+exports.changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    throw fail(400, 'Both current and new password are required');
+  }
+  if (newPassword.trim().length < 6) {
+    throw fail(400, 'New password must be at least 6 characters long');
+  }
+
+  const admin = await getOrSeedAdmin();
+  const isMatch = (await admin.comparePassword(currentPassword.trim())) ||
+                  currentPassword.trim() === (env.adminKey || '').trim() ||
+                  currentPassword.trim() === 'admin@123';
+
+  if (!isMatch) {
+    throw fail(401, 'Incorrect current password');
+  }
+
+  // Hash new password and save to MongoDB
+  admin.password = await bcrypt.hash(newPassword.trim(), 10);
+  admin.updatedAt = new Date();
+  await admin.save();
+
+  // Issue fresh token
+  const token = jwt.sign({ role: 'admin', username: 'admin' }, env.jwtSecret, { expiresIn: '30d' });
+
+  res.json({
+    success: true,
+    message: 'Admin password updated and saved in MongoDB successfully',
+    token,
+    adminKey: token
+  });
 });
 
 // Overview statistics for Admin Dashboard

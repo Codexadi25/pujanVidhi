@@ -18,6 +18,7 @@ r.get('/products', adm.getProducts);
 
 // Admin Auth & Stats
 r.post('/admin/login', adm.login);
+r.post('/admin/change-password', admin, adm.changePassword);
 r.get('/admin/stats', admin, adm.getStats);
 
 // Admin User Management

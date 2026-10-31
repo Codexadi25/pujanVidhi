@@ -287,6 +287,9 @@
       <a href="https://poojanvidhi.web.app/" target="_blank" class="btn btn-outline">
         🌐 Open Client Website
       </a>
+      <button id="changePassBtn" class="btn btn-outline hidden" onclick="openChangePasswordModal()">
+        🔑 Change Password
+      </button>
       <button id="logoutBtn" class="btn btn-outline hidden" onclick="handleLogout()">
         Logout
       </button>
@@ -411,6 +414,38 @@
     </div>
   </div>
 
+  <!-- Change Password Modal -->
+  <div id="changePassModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 100%; max-width: 420px; padding: 28px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 1.2rem;">🔑 Change Admin Password</h3>
+        <button onclick="closeChangePasswordModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+        Update your master admin password. This will be hashed with bcrypt and saved directly to the MongoDB database.
+      </p>
+      <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label for="currPassInput">Current Password</label>
+          <input type="password" id="currPassInput" class="input-control" placeholder="Current passkey..." required />
+        </div>
+        <div class="form-group">
+          <label for="newPassInput">New Password (min 6 characters)</label>
+          <input type="password" id="newPassInput" class="input-control" placeholder="New password..." required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassInput">Confirm New Password</label>
+          <input type="password" id="confirmPassInput" class="input-control" placeholder="Confirm new password..." required minlength="6" />
+        </div>
+        <div id="changePassMsg" style="margin-bottom: 14px; font-size: 13px; font-weight: 600;" class="hidden"></div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" onclick="closeChangePasswordModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save to MongoDB</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     let allUsers = [];
     let currentAdminKey = sessionStorage.getItem('pv_admin_key') || localStorage.getItem('pv_admin_key') || '';
@@ -428,13 +463,79 @@
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('logoutBtn').classList.add('hidden');
+      document.getElementById('changePassBtn').classList.add('hidden');
     }
 
     function showDashboard() {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
+      document.getElementById('changePassBtn').classList.remove('hidden');
       fetchDashboardData();
+    }
+
+    function openChangePasswordModal() {
+      document.getElementById('currPassInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmPassInput').value = '';
+      const msgEl = document.getElementById('changePassMsg');
+      msgEl.className = 'hidden';
+      msgEl.textContent = '';
+      document.getElementById('changePassModal').classList.remove('hidden');
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('changePassModal').classList.add('hidden');
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const currentPassword = document.getElementById('currPassInput').value.trim();
+      const newPassword = document.getElementById('newPassInput').value.trim();
+      const confirmPassword = document.getElementById('confirmPassInput').value.trim();
+      const msgEl = document.getElementById('changePassMsg');
+      msgEl.className = '';
+
+      if (newPassword !== confirmPassword) {
+        msgEl.style.color = '#ef5350';
+        msgEl.textContent = 'New passwords do not match';
+        return;
+      }
+      if (newPassword.length < 6) {
+        msgEl.style.color = '#ef5350';
+        msgEl.textContent = 'Password must be at least 6 characters long';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/admin/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': currentAdminKey
+          },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          msgEl.style.color = '#a5d6a7';
+          msgEl.textContent = '✓ Password successfully updated and saved in MongoDB!';
+          if (data.token) {
+            currentAdminKey = data.token;
+            sessionStorage.setItem('pv_admin_key', data.token);
+            localStorage.setItem('pv_admin_key', data.token);
+          }
+          setTimeout(() => {
+            closeChangePasswordModal();
+          }, 1600);
+        } else {
+          msgEl.style.color = '#ef5350';
+          msgEl.textContent = data.message || 'Failed to update password';
+        }
+      } catch (err) {
+        msgEl.style.color = '#ef5350';
+        msgEl.textContent = 'Network error: ' + err.message;
+      }
     }
 
     async function handleLogin(e) {
