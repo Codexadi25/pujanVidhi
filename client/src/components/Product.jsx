@@ -1,34 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Video, ListChecks, Languages, Clock3, Smartphone, ArrowUpRight } from "lucide-react";
+import {
+  FileText,
+  Video,
+  ListChecks,
+  Languages,
+  Clock3,
+  Smartphone,
+  ArrowUpRight,
+  ShieldCheck,
+  CheckCircle2
+} from "lucide-react";
 import { api } from '../services/api';
 
-const items = [
-  [FileText, "Downloadable Puja Vidhi PDF"],
-  [ListChecks, "Puja Samagri checklist"],
-  [BookTextIcon, "Mantras and meanings"],
-  [Video, "Step-by-Step Walkthrough Video Included"],
-  [Clock3, "Muhurat information, if included"],
-  [Smartphone, "Mobile-friendly access"]
+const actualFeatures = [
+  [FileText, "Lakshmi-Ganesh Pooja Vidhi (Complete 16-Step Shodashopachara)"],
+  [ListChecks, "Exhaustive Samagri Checklist with Kitchen & Household Substitutes"],
+  [Languages, "Sacred Sanskrit Mantras with Simple Hindi & English Meanings"],
+  [FileText, "Illustrated Chowki & Kalash Sthapana Altar Diagram"],
+  [Video, "Full HD Step-by-Step Video Walkthrough of Every Stage"],
+  [Clock3, "Diwali Shubh Muhurat & Sthir Lagna Timing Guidance"],
+  [CheckCircle2, "Printable Sacred Aarti Sangrah (Lakshmi Mata & Ganesh Ji)"],
+  [Smartphone, "Instant Cloud Access on Mobile, Tablet & Laptop (Perpetual)"]
 ];
-function BookTextIcon(props) { return <FileText {...props}/>; }
 
 export default function Product({ t, onOpenBuy }) {
-  const [priceRange, setPriceRange] = useState('₹21 / ₹51');
+  const [prices, setPrices] = useState({ essential: 21, complete: 121 });
 
   useEffect(() => {
     let isMounted = true;
     api.getProducts()
       .then(res => {
-        if (isMounted && res?.products && Array.isArray(res.products) && res.products.length > 0) {
-          const active = res.products.filter(p => p.isActive);
-          if (active.length > 0) {
-            const prices = active.map(p => p.price).sort((a, b) => a - b);
-            if (prices.length === 1) {
-              setPriceRange(`₹${prices[0]}`);
-            } else {
-              setPriceRange(`₹${prices[0]} / ₹${prices[prices.length - 1]}`);
-            }
-          }
+        if (isMounted && res?.products && Array.isArray(res.products)) {
+          const pDigital = res.products.find(p => p.type === 'digital_kit' || (!p.hasVideoAccess && p.isActive));
+          const pVideo = res.products.find(p => p.type === 'video_kit' || (p.hasVideoAccess && p.isActive));
+          setPrices({
+            essential: pDigital?.price || 21,
+            complete: pVideo?.price || 121
+          });
         }
       })
       .catch(() => {});
@@ -40,32 +48,49 @@ export default function Product({ t, onOpenBuy }) {
       <div className="product-visual">
         <div className="book-shadow"/>
         <div className="book-cover">
-          <span className="book-top">पूजनविधि • 2026</span>
-          <span className="book-om">ॐ</span>
+          <span className="book-top">दीवाली पूजन २०२६</span>
+          <span className="book-om">🕉️</span>
           <span className="book-title">श्री लक्ष्मी-गणेश<br/>पूजन विधि</span>
-          <span className="book-subtitle">THE DIWALI PUJA GUIDE</span>
-          <span className="book-bottom">श्रद्धा • परंपरा • मंगलकामना</span>
+          <span className="book-subtitle">THE DIWALI POOJA GUIDE</span>
+          <span className="book-bottom">पारंपरिक विधि • पावन मंत्र • सरल अर्थ</span>
         </div>
-        <div className="product-sticker">DIGITAL<br/>EDITION</div>
+        <div className="product-sticker">DIGITAL<br/>GUIDE</div>
       </div>
+
       <div className="product-copy">
         <span className="section-kicker">{t.productEyebrow}</span>
         <h2>{t.productTitle}</h2>
         <p>{t.productText}</p>
+
         <h3>{t.included}</h3>
         <ul className="included-list">
-          {items.map(([Icon, label]) => <li key={label}><Icon size={19}/>{label}</li>)}
+          {actualFeatures.map(([Icon, label]) => (
+            <li key={label}>
+              <Icon size={18}/>
+              <span>{label}</span>
+            </li>
+          ))}
         </ul>
+
         <div className="price-row">
           <div>
-            <span className="price-placeholder">Special {priceRange}</span>
-            <small>One-time payment • Lifetime sacred access</small>
+            <span className="price-placeholder">
+              ₹{prices.essential} / ₹{prices.complete}
+            </span>
+            <small>One-time payment • Lifetime sacred family access • No subscription</small>
           </div>
-          <button className="button" style={{ cursor: "pointer" }} onClick={() => onOpenBuy && onOpenBuy('video_kit')}>
-            Get the Kit <ArrowUpRight size={16}/>
+          <button
+            className="button"
+            style={{ cursor: "pointer" }}
+            onClick={() => onOpenBuy && onOpenBuy('video_kit')}
+          >
+            {t.productCTA} <ArrowUpRight size={16}/>
           </button>
         </div>
-        <small className="disclaimer">Instant online access granted immediately upon confirmation.</small>
+
+        <small className="disclaimer">
+          ⚡ 100% Secure Checkout via Razorpay (UPI, Google Pay, Cards, Netbanking). Instant access unlocked immediately.
+        </small>
       </div>
     </section>
   );

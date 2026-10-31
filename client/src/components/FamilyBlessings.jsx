@@ -1,4 +1,5 @@
 import React from 'react';
+
 export default function FamilyBlessings({ t }) {
   return (
     <section className="family-section section" id="about">
@@ -7,7 +8,7 @@ export default function FamilyBlessings({ t }) {
         <div className="family-image-placeholder" style={{ overflow: "hidden", position: "relative" }}>
           <img
             src="/images/family.png"
-            alt="Family celebrating Diwali Puja"
+            alt="Family celebrating sacred Diwali Lakshmi Ganesh Puja together"
             className="family-img"
             style={{
               width: "100%",
@@ -19,13 +20,14 @@ export default function FamilyBlessings({ t }) {
             }}
           />
         </div>
-        <span className="lotus lotus-one">✿</span><span className="lotus lotus-two">✿</span>
+        <span className="lotus lotus-one">🪷</span><span className="lotus lotus-two">🪷</span>
       </div>
+
       <div className="family-copy">
-        <span className="section-kicker">BLESSINGS OF DIWALI</span>
+        <span className="section-kicker">{t.familyKicker || "A CELEBRATION OF FAITH"}</span>
         <h2>{t.familyTitle}</h2>
         <p>{t.familyText}</p>
-        <p className="script-line">May your home be filled with light, love and auspicious beginnings.</p>
+        <p className="script-line">“{t.familyScript}”</p>
       </div>
     </section>
   );

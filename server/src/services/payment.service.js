@@ -26,7 +26,7 @@ exports.markPaid = async (user, orderId, paymentId, plan = 'kit', hasVideoAccess
         type: planType === 'video_kit' ? 'video_kit' : 'digital_kit',
         isActive: true
       });
-      resolvedAmount = prod?.price || (planType === 'video_kit' ? 51 : 21);
+      resolvedAmount = prod?.price || (planType === 'video_kit' ? 121 : 21);
     }
 
     await Payment.findOneAndUpdate(

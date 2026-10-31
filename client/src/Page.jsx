@@ -9,6 +9,7 @@ import Steps from "./components/Steps";
 import GlobalFamilies from "./components/GlobalFamilies";
 import Preview from "./components/Preview";
 import Trust from "./components/Trust";
+import PricingSection from "./components/PricingSection";
 import FAQ from "./components/FAQ";
 import FinalCTA from "./components/FinalCTA";
 import ShareSection from "./components/ShareSection";
@@ -24,9 +25,8 @@ export default function Page() {
   const [initialKit, setInitialKit] = useState("video_kit");
   const t = content[lang];
 
-  // 1. Initial Wake-Up: Polls server on first landing until 1 is returned
-  // 2. Continuous 3-minute heartbeat: Prevents Render free-tier from idling to sleep
-  const { serverReady, isWakingUp } = useServerWakeup({ intervalMs: 180000 });
+  // Continuous health heartbeat hook to keep Render warm
+  useServerWakeup({ intervalMs: 180000 });
 
   useEffect(() => {
     const handleHash = () => {
@@ -97,27 +97,57 @@ export default function Page() {
 
   return (
     <div className={lang === "hi" ? "app hindi" : "app"}>
+      {/* Navigation Header */}
       <Header t={t} lang={lang} setLang={setLang} onOpenBuy={() => openBuy("video_kit")} />
+
       <main>
+        {/* Section 1: Hero */}
         <Hero t={t} onOpenBuy={() => openBuy("video_kit")} />
+
+        {/* Section 2: Emotional Connection */}
         <FamilyBlessings t={t} />
-        <Problem t={t} />
+
+        {/* Section 3: Problem & Solution */}
+        <Problem t={t} lang={lang} />
+
+        {/* Section 4: Product Showcase */}
         <Product t={t} onOpenBuy={(k) => openBuy(k || "kit")} />
-        <Steps t={t} />
+
+        {/* Section 5: How It Works */}
+        <Steps t={t} lang={lang} />
+
+        {/* Section 6: Accessibility */}
         <GlobalFamilies t={t} />
+
+        {/* Section 7: Product Preview */}
         <Preview t={t} onOpenBuy={() => openBuy("video_kit")} />
+
+        {/* Section 8: Trust */}
         <Trust t={t} />
-        <FAQ t={t} />
+
+        {/* Section 9: Pricing & Purchase */}
+        <PricingSection t={t} onOpenBuy={(k) => openBuy(k || "video_kit")} lang={lang} />
+
+        {/* Section 10: Frequently Asked Questions */}
+        <FAQ t={t} lang={lang} />
+
+        {/* Section 11: Final Conversion CTA */}
         <FinalCTA t={t} onOpenBuy={() => openBuy("video_kit")} />
       </main>
+
+      {/* Section 12: Social Sharing */}
       <ShareSection />
+
+      {/* Footer */}
       <Footer t={t} onOpenPrivacy={openPrivacy} />
+
+      {/* Mobile Sticky CTA */}
       <button
         className="mobile-sticky-cta"
         style={{ border: 0, width: "100%", cursor: "pointer" }}
         onClick={() => openBuy("video_kit")}
       >
-        {t.buy}
+        {t.buy} (₹121)
       </button>
     </div>
   );

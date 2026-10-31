@@ -52,39 +52,39 @@ const seedDefaultProducts = async () => {
   if (count === 0) {
     await Product.create([
       {
-        name: 'Poojan Vidhi Kit',
-        subtitle: 'Complete Diwali Lakshmi-Ganesh Puja Digital Guide',
-        price: 51,
+        name: 'Essential Guide',
+        subtitle: 'Complete Diwali Lakshmi-Ganesh Pooja Digital Guide',
+        price: 21,
         origPrice: 199,
         badge: 'Essential Guide',
         type: 'digital_kit',
         hasVideoAccess: false,
         features: [
           'Complete Step-by-Step Diwali Lakshmi-Ganesh Vidhi',
-          'Detailed Samagri Checklist with Household Substitutes',
+          'Detailed Samagri Checklist with Kitchen Substitutes',
           'Sacred Sanskrit Mantras with Hindi & English Meanings',
-          'Chowki & Kalash Sthapana Illustrated Diagram',
-          'Diwali Muhurat & Sthir Lagna Guide',
+          'Illustrated Chowki & Kalash Sthapana Altar Diagram',
+          'Diwali Shubh Muhurat & Sthir Lagna Guide',
           'Perpetual Digital Access for Your Family'
         ],
         isActive: true,
         sortOrder: 1
       },
       {
-        name: 'Poojan Vidhi Video + Poojan Kit',
-        subtitle: 'Premium Masterclass: Video Walkthrough + Sacred Kit',
+        name: 'Complete Video Guide',
+        subtitle: 'Full HD Ritual Video Walkthrough + Sacred Pooja Kit',
         price: 121,
         origPrice: 499,
-        badge: 'Most Recommended',
+        badge: 'Recommended • Most Popular',
         type: 'video_kit',
         hasVideoAccess: true,
         features: [
-          'Everything in the Poojan Vidhi Kit',
-          'Full HD Step-by-Step Video Walkthrough of Every Puja Stage',
-          'Audio Guide for Accurate Sanskrit Mantra Pronunciation',
-          'Printable Sacred Aarti Sangrah',
-          'Family Sankalp & Deepdaan Sacred Traditions Guide',
-          'Priority Festive Guidance & Unlimited Cloud Access'
+          'Everything in the Essential Guide included',
+          'Full HD Step-by-Step Video Walkthrough of Every Ritual',
+          'Authentic Audio Guide for Accurate Sanskrit Mantra Chanting',
+          'Printable Sacred Aarti Sangrah (Lakshmi Mata & Ganesh Ji)',
+          'Family Sankalp & 14 Deepdaan Auspicious Lighting Guide',
+          'Priority Devotee Assistance via WhatsApp & Email'
         ],
         isActive: true,
         sortOrder: 2
