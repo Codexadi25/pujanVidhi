@@ -1,9 +1,13 @@
 const express = require('express'), cors = require('cors'), helmet = require('helmet'), rateLimit = require('express-rate-limit'), path = require('path'), fs = require('fs');
 const env = require('./config/env'), routes = require('./routes'), { webhook } = require('./controllers/payment.controller'), { notFound, errorHandler } = require('./middleware/error');
-const adm = require('./controllers/admin.controller'), admin = require('./middleware/admin'), s = require('./controllers/settings.controller'), c = require('./controllers/content.controller');
+const adm = require('./controllers/admin.controller'), admin = require('./middleware/admin'), s = require('./controllers/settings.controller'), c = require('./controllers/content.controller'), h = require('./controllers/health.controller');
 
 const app = express();
 app.set('trust proxy', 1);
+
+// Fast server wake-up endpoints for Render / Cloud hosting platforms
+app.get('/ping', h.ping);
+app.get('/health', h.ping);
 
 // Configure CORS and Helmet to allow frontend URL, video streaming, and local connections
 app.use(helmet({

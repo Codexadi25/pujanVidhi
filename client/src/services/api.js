@@ -166,6 +166,22 @@ export const api = {
     });
   },
 
+  async ping() {
+    try {
+      const data = await apiRequest('/ping');
+      return data?.status === 1 || data === 1 || data === '1';
+    } catch {
+      try {
+        const rootUrl = API_BASE.replace(/\/api\/v1\/?$/, '');
+        const res = await fetch(`${rootUrl || ''}/ping`);
+        const text = await res.text();
+        return text === '1' || text.includes('"status":1');
+      } catch {
+        return false;
+      }
+    }
+  },
+
   logout() {
     authStorage.clear();
   }

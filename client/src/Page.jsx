@@ -14,12 +14,17 @@ import FinalCTA from "./components/FinalCTA";
 import Footer from "./components/Footer";
 import BuyPage from "./components/BuyPage";
 import AdminDashboard from "./components/admin/AdminDashboard";
+import { useServerWakeup } from "./hooks/useServerWakeup";
 
 export default function Page() {
   const [lang, setLang] = useState("en");
   const [view, setView] = useState("home"); // "home", "buy", "admin"
   const [initialKit, setInitialKit] = useState("video_kit");
   const t = content[lang];
+
+  // 1. Initial Wake-Up: Polls server on first landing until 1 is returned
+  // 2. Continuous 3-minute heartbeat: Prevents Render free-tier from idling to sleep
+  const { serverReady, isWakingUp } = useServerWakeup({ intervalMs: 180000 });
 
   useEffect(() => {
     const handleHash = () => {
