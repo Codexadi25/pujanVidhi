@@ -19,3 +19,4 @@ adminSchema.methods.comparePassword = async function(candidatePassword) {
 };
 
 module.exports = model('Admin', adminSchema);
+
