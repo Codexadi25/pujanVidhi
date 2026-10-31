@@ -246,3 +246,4 @@ export default function PricingSection({ t, onOpenBuy, lang = 'en' }) {
     </section>
   );
 }
+

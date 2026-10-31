@@ -124,6 +124,16 @@ export const api = {
     return data;
   },
 
+  async access({ phone }) {
+    const data = await apiRequest('/access', {
+      method: 'POST',
+      body: JSON.stringify({ phone })
+    });
+    if (data.token) authStorage.setToken(data.token);
+    if (data.user) authStorage.setUser(data.user);
+    return data;
+  },
+
   async getMe() {
     const data = await apiRequest('/me');
     if (data.user) authStorage.setUser(data.user);

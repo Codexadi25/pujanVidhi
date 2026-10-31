@@ -540,13 +540,19 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
                   className={`auth-tab ${authMode === 'signup' ? 'active' : ''}`}
                   onClick={() => { setAuthMode('signup'); setError(''); }}
                 >
-                  <User size={16} /> Create Account (New User)
+                  <User size={16} /> Instant Devotee Checkout
+                </button>
+                <button
+                  className={`auth-tab ${authMode === 'phone' ? 'active' : ''}`}
+                  onClick={() => { setAuthMode('phone'); setError(''); }}
+                >
+                  <Phone size={16} /> Already Paid? Access via Phone
                 </button>
                 <button
                   className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
                   onClick={() => { setAuthMode('login'); setError(''); }}
                 >
-                  <Lock size={16} /> Already Have an Account? Login
+                  <Lock size={16} /> Password Login
                 </button>
               </div>
 
@@ -620,6 +626,36 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
                     )}
                   </button>
                   <small className="form-privacy-note">🔒 Your personal details are strictly private and sacred.</small>
+                </form>
+              ) : authMode === 'phone' ? (
+                <form className="auth-form" onSubmit={handlePhoneAccess}>
+                  <div className="form-legend">
+                    <h4>Instant Access for Paid Devotees</h4>
+                    <p>Enter your 10-digit mobile number used during purchase to unlock your sacred Puja Vidhi immediately.</p>
+                  </div>
+
+                  <div className="input-group">
+                    <label>10-Digit Mobile Number *</label>
+                    <div className="input-wrapper">
+                      <Phone size={16} className="input-icon" />
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        placeholder="e.g. 9876543210"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <button className="auth-submit-btn" type="submit" disabled={loading}>
+                    {loading ? <RefreshCw className="spin" size={18} /> : (
+                      <>Unlock My Puja Vidhi <ArrowRight size={18} /></>
+                    )}
+                  </button>
+                  <small className="form-privacy-note">Need help? WhatsApp us at +91 9956355567</small>
                 </form>
               ) : (
                 <form className="auth-form" onSubmit={handleLogin}>
