@@ -339,6 +339,181 @@
   border-color: #f0c97b;
 }
 
+/* Kit Selection Action Bar (Step 1 CTA) */
+.kit-selection-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fffdfa;
+  border: 1.5px solid #e7d4be;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin: 30px auto 0;
+  max-width: 760px;
+  box-shadow: 0 8px 24px rgba(75, 23, 22, 0.08);
+}
+.selected-kit-summary-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #5c3f31;
+}
+.btn-proceed-to-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #8f211c, #6c1511);
+  color: #fff9ee;
+  border: 1px solid #d9b86c;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(143, 33, 28, 0.25);
+}
+.btn-proceed-to-account:hover {
+  background: linear-gradient(135deg, #781814, #57100d);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(143, 33, 28, 0.35);
+}
+
+/* Step Navigation Bar (Step 2 & 3 header) */
+.step-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 640px;
+  margin: 0 auto 20px;
+  padding: 0 4px;
+}
+.btn-step-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid #dcc4ab;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: #795d4f;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-step-back:hover {
+  background: #fbf2e3;
+  color: var(--maroon);
+  border-color: var(--maroon);
+}
+.step-context-pill {
+  font-size: 13px;
+  color: #6d5345;
+  background: #fffdfa;
+  border: 1px solid #e7d4be;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+.step-context-pill strong {
+  color: var(--maroon);
+}
+
+/* Account Confirmed Card */
+.account-confirmed-card {
+  background: #fffdfa;
+  border: 1.5px solid #ecdcc6;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(75, 23, 22, 0.08);
+}
+.account-user-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee0cd;
+}
+.account-user-row h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: var(--maroon);
+}
+.account-user-row p {
+  margin: 0;
+  font-size: 13px;
+  color: #795d4f;
+}
+.account-plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff8ef;
+  border: 1px solid #ebd9bf;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #5c3f31;
+}
+.account-plan-row strong {
+  color: var(--maroon);
+  font-size: 16px;
+}
+.account-action-buttons {
+  display: flex;
+  gap: 14px;
+}
+.btn-proceed-to-payment {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #8f211c, #6c1511);
+  color: #fff9ee;
+  border: 1px solid #d9b86c;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-proceed-to-payment:hover {
+  background: linear-gradient(135deg, #781814, #57100d);
+  transform: translateY(-2px);
+}
+.btn-switch-account {
+  flex: 1;
+  background: #fdf6ec;
+  border: 1px solid #d9c5ac;
+  color: #795d4f;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-switch-account:hover {
+  background: #f7ebd9;
+  color: var(--maroon);
+}
+
+@media (max-width: 760px) {
+  .kit-selection-action-bar {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+  .account-action-buttons {
+    flex-direction: column;
+  }
+}
+
 /* Checkout Section Container */
 .checkout-section-container {
   max-width: 640px;

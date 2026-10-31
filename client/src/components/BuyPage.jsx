@@ -11,8 +11,8 @@ const defaultKits = [
   {
     id: 'kit',
     productId: null,
-    name: 'Essential Guide',
-    subtitle: 'Complete Diwali Lakshmi-Ganesh Pooja Digital Guide',
+    name: 'Poojan Vidhi Kit',
+    subtitle: 'Complete Diwali Lakshmi-Ganesh Puja Digital Guide',
     price: 21,
     origPrice: 199,
     savings: 'Save 89%',
@@ -21,31 +21,31 @@ const defaultKits = [
     hasVideoAccess: false,
     features: [
       'Complete Step-by-Step Diwali Lakshmi-Ganesh Vidhi',
-      'Detailed Samagri Checklist with Kitchen Substitutes',
+      'Detailed Samagri Checklist with Household Substitutes',
       'Sacred Sanskrit Mantras with Hindi & English Meanings',
-      'Illustrated Chowki & Kalash Sthapana Altar Diagram',
-      'Diwali Shubh Muhurat & Sthir Lagna Guide',
+      'Chowki & Kalash Sthapana Illustrated Diagram',
+      'Diwali Muhurat & Sthir Lagna Guide',
       'Perpetual Digital Access for Your Family'
     ]
   },
   {
     id: 'video_kit',
     productId: null,
-    name: 'Complete Video Guide',
-    subtitle: 'Full HD Ritual Video Walkthrough + Sacred Pooja Kit',
+    name: 'Poojan Vidhi Video + Poojan Kit',
+    subtitle: 'Premium Masterclass: Video Walkthrough + Sacred Kit',
     price: 121,
     origPrice: 499,
     savings: 'Save 76%',
-    badge: 'Recommended • Most Popular',
+    badge: 'Most Popular & Recommended',
     featured: true,
     hasVideoAccess: true,
     features: [
-      'Everything in the Essential Guide included',
-      'Full HD Step-by-Step Video Walkthrough of Every Ritual',
-      'Authentic Audio Guide for Accurate Sanskrit Mantra Chanting',
-      'Printable Sacred Aarti Sangrah (Lakshmi Mata & Ganesh Ji)',
-      'Family Sankalp & 14 Deepdaan Auspicious Lighting Guide',
-      'Priority Devotee Assistance via WhatsApp & Email'
+      'Everything in the Poojan Vidhi Kit',
+      'Full HD Step-by-Step Video Walkthrough of Every Puja Stage',
+      'Audio Guide for Accurate Sanskrit Mantra Pronunciation',
+      'Printable Sacred Aarti Sangrah',
+      'Family Sankalp & Deepdaan Sacred Traditions Guide',
+      'Priority Festive Guidance & Unlimited Cloud Access'
     ]
   }
 ];
@@ -53,8 +53,8 @@ const defaultKits = [
 export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
   const [selectedKit, setSelectedKit] = useState(initialKit); // 'kit' or 'video_kit'
   const [user, setUser] = useState(authStorage.getUser());
-  const [authMode, setAuthMode] = useState('signup'); // 'signup' or 'login'
-  const [step, setStep] = useState('select'); // 'select', 'payment', 'access'
+  const [authMode, setAuthMode] = useState('signup'); // 'signup', 'phone', or 'login'
+  const [step, setStep] = useState('select'); // 'select', 'account', 'payment', 'access'
   
   // Dynamic products from server
   const [dbProducts, setDbProducts] = useState([]);
@@ -89,7 +89,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
     return () => { isMounted = false; };
   }, []);
 
-  // Check login on mount and verify with server (DO NOT AUTO-JUMP to access viewer)
+  // Check login on mount and verify with server
   useEffect(() => {
     const token = authStorage.getToken();
     if (token) {
@@ -97,7 +97,6 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         .then(res => {
           if (res?.user) {
             setUser(res.user);
-            // Notice: We deliberately keep step = 'select' so user can view storefront/prices
           }
         })
         .catch(() => {
@@ -159,9 +158,11 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
     setError('');
     
     if (!name.trim()) return setError('Please enter your full name');
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Please enter a valid email address');
+    if (!/^S+@S+.S+$/.test(email)) return setError('Please enter a valid email address');
     if (!/^\d{10}$/.test(phone.trim())) return setError('Please enter a valid 10-digit mobile number');
-    if (password.length < 6) return setError('Password must be at least 6 characters');
+    
+    // Auto-fallback password if left blank or user-provided
+    const pwdToUse = password && password.length >= 6 ? password : ('User@' + phone.trim());
 
     try {
       setLoading(true);
@@ -169,7 +170,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
-        password
+        password: pwdToUse
       });
 
       setUser(res.user);
@@ -180,14 +181,40 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         await loadContent();
       } else {
         setStep('payment');
-        setTimeout(() => {
-          document.getElementById('payment-section')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-        // Automatically open the Razorpay checkout modal
-        initiatePayment(res.user);
       }
     } catch (err) {
       setError(err.message || 'Registration failed. Please check your details and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Phone Access (for already paid users)
+  const handlePhoneAccess = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const cleanPhone = phone.trim();
+    if (!/^\d{10}$/.test(cleanPhone)) {
+      return setError('Please enter a valid 10-digit mobile number');
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.access({ phone: cleanPhone });
+      if (res?.user) {
+        setUser(res.user);
+        if (res.user.paid && (res.user.plan === selectedKit || res.user.hasVideoAccess)) {
+          setStep('access');
+          await loadContent();
+        } else {
+          setStep('payment');
+        }
+      } else {
+        setError('No account found for this mobile number. Please fill out details to sign up.');
+      }
+    } catch (err) {
+      setError(err.message || 'Could not verify mobile number. If you are a new devotee, please sign up.');
     } finally {
       setLoading(false);
     }
@@ -215,9 +242,6 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         await loadContent();
       } else {
         setStep('payment');
-        setTimeout(() => {
-          document.getElementById('payment-section')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
       }
     } catch (err) {
       setError(err.message || 'Invalid credentials. Please check and try again.');
@@ -260,7 +284,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
 
         const options = {
           key: orderData.key,
-          amount: orderData.amount, // Exact dynamic amount in paise from server
+          amount: orderData.amount,
           currency: 'INR',
           name: 'Poojan Vidhi',
           description: orderData.productTitle || currentKitInfo.name,
@@ -397,34 +421,38 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         </div>
       </header>
 
-      {/* Progress Stepper */}
+      {/* Progress Stepper with 4 Distinct Steps */}
       <div className="stepper-bar">
-        <div className={`step-item ${step === 'select' ? 'active' : 'completed'}`}>
+        <div 
+          className={`step-item ${step === 'select' ? 'active' : 'completed'}`}
+          onClick={() => step !== 'select' && setStep('select')}
+          style={{ cursor: step !== 'select' ? 'pointer' : 'default' }}
+        >
           <span className="step-num">{step !== 'select' ? '✓' : '1'}</span>
           <span className="step-label">Select Kit</span>
         </div>
         <div className="step-line" />
+        <div 
+          className={`step-item ${step === 'account' ? 'active' : (step === 'payment' || user?.paid) ? 'completed' : ''}`}
+          onClick={() => (step === 'payment' && !user?.paid) && setStep('account')}
+          style={{ cursor: step === 'payment' ? 'pointer' : 'default' }}
+        >
+          <span className="step-num">{step === 'payment' || user?.paid ? '✓' : '2'}</span>
+          <span className="step-label">Setup Account</span>
+        </div>
+        <div className="step-line" />
         <div className={`step-item ${step === 'payment' ? 'active' : user?.paid ? 'completed' : ''}`}>
-          <span className="step-num">{user?.paid ? '✓' : '2'}</span>
-          <span className="step-label">Account &amp; Payment</span>
+          <span className="step-num">{user?.paid ? '✓' : '3'}</span>
+          <span className="step-label">Payment</span>
         </div>
         <div className="step-line" />
         <div className={`step-item ${step === 'access' ? 'active' : ''}`}>
-          <span className="step-num">3</span>
+          <span className="step-num">4</span>
           <span className="step-label">Online Access</span>
         </div>
       </div>
 
       <div className="buy-content-wrapper">
-        <div className="buy-intro-text">
-          <span className="section-kicker"><Sparkles size={14} /> DIWALI 2026 AUSPICIOUS KITS</span>
-          <h1>Choose Your Guided Puja Experience</h1>
-          <p>
-            Perform your Diwali Lakshmi-Ganesh Puja with complete confidence, pristine Vedic procedures,
-            and profound peace of mind.
-          </p>
-        </div>
-
         {/* If user is logged in and already paid, show friendly banner */}
         {user?.paid && (
           <div style={{
@@ -478,313 +506,374 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
           </div>
         )}
 
-        {/* Step 1: Select Kit (Dynamic from Database) */}
-        <div className="kits-grid-container">
-          {kits.map((kit) => {
-            const isSelected = selectedKit === kit.id || selectedKit === kit.productId;
-            return (
-              <div
-                key={kit.productId || kit.id}
-                className={`kit-card ${kit.featured ? 'featured' : ''} ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedKit(kit.id)}
-              >
-                {kit.badge && <span className="kit-badge">{kit.badge}</span>}
-                <div className="kit-header">
-                  <h3>{kit.name}</h3>
-                  <p>{kit.subtitle}</p>
-                </div>
-
-                <div className="kit-pricing">
-                  <span className="currency">₹</span>
-                  <span className="amount">{kit.price}</span>
-                  {kit.origPrice > kit.price && (
-                    <span className="original">₹{kit.origPrice}</span>
-                  )}
-                  {kit.savings && (
-                    <span className="savings">{kit.savings}</span>
-                  )}
-                </div>
-
-                <ul className="kit-features-list">
-                  {kit.features.map((feat, i) => (
-                    <li key={i}>
-                      <Check size={16} className="feat-check" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  type="button"
-                  className={`kit-select-btn ${isSelected ? 'btn-active' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedKit(kit.id);
-                    if (user && !user.paid) setStep('payment');
-                  }}
-                >
-                  {isSelected ? '✓ Selected Plan' : 'Select This Kit'}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Step 2: User Authentication or Payment Direct */}
-        <div className="checkout-section-container" id="payment-section">
-          {!user ? (
-            /* User NOT logged in: Show Signup / Login Form */
-            <div className="auth-card">
-              <div className="auth-tabs">
-                <button
-                  className={`auth-tab ${authMode === 'signup' ? 'active' : ''}`}
-                  onClick={() => { setAuthMode('signup'); setError(''); }}
-                >
-                  <User size={16} /> Instant Devotee Checkout
-                </button>
-                <button
-                  className={`auth-tab ${authMode === 'phone' ? 'active' : ''}`}
-                  onClick={() => { setAuthMode('phone'); setError(''); }}
-                >
-                  <Phone size={16} /> Already Paid? Access via Phone
-                </button>
-                <button
-                  className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
-                  onClick={() => { setAuthMode('login'); setError(''); }}
-                >
-                  <Lock size={16} /> Password Login
-                </button>
-              </div>
-
-              {authMode === 'signup' ? (
-                <form className="auth-form" onSubmit={handleSignup}>
-                  <div className="form-legend">
-                    <h4>Sign up to activate perpetual access to {currentKitInfo.name}</h4>
-                    <p>Enter your details below. You will be auto-directed to payment next.</p>
-                  </div>
-
-                  <div className="input-group">
-                    <label>Full Name *</label>
-                    <div className="input-wrapper">
-                      <User size={16} className="input-icon" />
-                      <input
-                        type="text"
-                        placeholder="e.g. Rameshwar Sharma"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="input-group">
-                    <label>Email Address *</label>
-                    <div className="input-wrapper">
-                      <Mail size={16} className="input-icon" />
-                      <input
-                        type="email"
-                        placeholder="e.g. rameshwar@gmail.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="input-group">
-                    <label>10-Digit Mobile Number *</label>
-                    <div className="input-wrapper">
-                      <Phone size={16} className="input-icon" />
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        placeholder="e.g. 9876543210"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="input-group">
-                    <label>Create Password *</label>
-                    <div className="input-wrapper">
-                      <KeyRound size={16} className="input-icon" />
-                      <input
-                        type="password"
-                        placeholder="Min 6 characters"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <button className="auth-submit-btn" type="submit" disabled={loading}>
-                    {loading ? <RefreshCw className="spin" size={18} /> : (
-                      <>Create Account &amp; Proceed to Payment <ArrowRight size={18} /></>
-                    )}
-                  </button>
-                  <small className="form-privacy-note">🔒 Your personal details are strictly private and sacred.</small>
-                </form>
-              ) : authMode === 'phone' ? (
-                <form className="auth-form" onSubmit={handlePhoneAccess}>
-                  <div className="form-legend">
-                    <h4>Instant Access for Paid Devotees</h4>
-                    <p>Enter your 10-digit mobile number used during purchase to unlock your sacred Puja Vidhi immediately.</p>
-                  </div>
-
-                  <div className="input-group">
-                    <label>10-Digit Mobile Number *</label>
-                    <div className="input-wrapper">
-                      <Phone size={16} className="input-icon" />
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        placeholder="e.g. 9876543210"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  <button className="auth-submit-btn" type="submit" disabled={loading}>
-                    {loading ? <RefreshCw className="spin" size={18} /> : (
-                      <>Unlock My Puja Vidhi <ArrowRight size={18} /></>
-                    )}
-                  </button>
-                  <small className="form-privacy-note">Need help? WhatsApp us at +91 9956355567</small>
-                </form>
-              ) : (
-                <form className="auth-form" onSubmit={handleLogin}>
-                  <div className="form-legend">
-                    <h4>Welcome back! Login to your account</h4>
-                    <p>Access your purchased kit or complete payment.</p>
-                  </div>
-
-                  <div className="input-group">
-                    <label>Email Address *</label>
-                    <div className="input-wrapper">
-                      <Mail size={16} className="input-icon" />
-                      <input
-                        type="email"
-                        placeholder="Enter your registered email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="input-group">
-                    <label>Password *</label>
-                    <div className="input-wrapper">
-                      <KeyRound size={16} className="input-icon" />
-                      <input
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <button className="auth-submit-btn" type="submit" disabled={loading}>
-                    {loading ? <RefreshCw className="spin" size={18} /> : (
-                      <>Login &amp; Continue <ArrowRight size={18} /></>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-          ) : (user.paid && step !== 'payment') ? (
-            /* User already purchased */
-            <div className="already-paid-card">
-              <CheckCircle2 size={48} className="gold-icon" />
-              <h3>Auspicious Access Active!</h3>
+        {/* STEP 1: SELECT KIT (Auth card completely removed from here) */}
+        {step === 'select' && (
+          <div className="step-container step-select-view">
+            <div className="buy-intro-text">
+              <span className="section-kicker"><Sparkles size={14} /> DIWALI 2026 AUSPICIOUS KITS</span>
+              <h1>Choose Your Guided Puja Experience</h1>
               <p>
-                Namaste <strong>{user.name}</strong>, your account already has verified access to the
-                <strong> {user.plan === 'video_kit' ? 'Poojan Vidhi Video + Kit' : 'Poojan Vidhi Kit'}</strong>.
+                Perform your Diwali Lakshmi-Ganesh Puja with complete confidence, pristine Vedic procedures,
+                and profound peace of mind.
               </p>
+            </div>
+
+            <div className="kits-grid-container">
+              {kits.map((kit) => {
+                const isSelected = selectedKit === kit.id || selectedKit === kit.productId;
+                return (
+                  <div
+                    key={kit.productId || kit.id}
+                    className={`kit-card ${kit.featured ? 'featured' : ''} ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedKit(kit.id)}
+                  >
+                    {kit.badge && <span className="kit-badge">{kit.badge}</span>}
+                    <div className="kit-header">
+                      <h3>{kit.name}</h3>
+                      <p>{kit.subtitle}</p>
+                    </div>
+
+                    <div className="kit-pricing">
+                      <span className="currency">₹</span>
+                      <span className="amount">{kit.price}</span>
+                      {kit.origPrice > kit.price && (
+                        <span className="original">₹{kit.origPrice}</span>
+                      )}
+                      {kit.savings && (
+                        <span className="savings">{kit.savings}</span>
+                      )}
+                    </div>
+
+                    <ul className="kit-features-list">
+                      {kit.features.map((feat, i) => (
+                        <li key={i}>
+                          <Check size={16} className="feat-check" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <button
+                      type="button"
+                      className={`kit-select-btn ${isSelected ? 'btn-active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedKit(kit.id);
+                        setStep(user ? 'payment' : 'account');
+                      }}
+                    >
+                      {isSelected ? '✓ Selected • Proceed to Setup Account' : 'Select This Kit'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="kit-selection-action-bar">
+              <div className="selected-kit-summary-pill">
+                <Sparkles size={16} className="gold-text" />
+                <span>Selected Plan: <strong>{currentKitInfo.name}</strong> • <strong>₹{currentKitInfo.price}</strong></span>
+              </div>
               <button
-                className="btn-open-kit"
-                onClick={() => { setStep('access'); loadContent(); }}
+                type="button"
+                className="btn-proceed-to-account"
+                onClick={() => setStep(user ? 'payment' : 'account')}
               >
-                <BookOpen size={18} /> Open Protected Kit Viewer
+                {user ? 'Proceed to Payment' : 'Proceed to Setup Account'} <ArrowRight size={18} />
               </button>
             </div>
-          ) : (
-            /* User logged in but NOT paid: Direct Payment Checkout */
-            <div className="payment-checkout-card">
-              <div className="checkout-header">
-                <CreditCard size={24} className="gold-icon" />
-                <div>
-                  <h3>Complete Your Order</h3>
-                  <p>Instant activation for <strong>{user.name}</strong> ({user.email})</p>
-                </div>
-              </div>
+          </div>
+        )}
 
-              <div className="order-summary-box">
-                <div className="summary-line">
-                  <span>Selected Package</span>
-                  <strong>{currentKitInfo.name}</strong>
-                </div>
-                <div className="summary-line">
-                  <span>Regular Price</span>
-                  <span className="strikethrough">₹{currentKitInfo.origPrice}</span>
-                </div>
-                <div className="summary-line">
-                  <span>Diwali Festive Discount</span>
-                  <span className="green-text">-₹{currentKitInfo.origPrice - currentKitInfo.price}</span>
-                </div>
-                <div className="summary-divider" />
-                <div className="summary-total">
-                  <span>Total Amount Payable:</span>
-                  <strong>₹{currentKitInfo.price}</strong>
-                </div>
-              </div>
-
-              <div className="payment-modes-info">
-                <span>Accepted Payment Methods:</span>
-                <div className="payment-badges">
-                  <span className="pay-badge">UPI / QR</span>
-                  <span className="pay-badge">Google Pay</span>
-                  <span className="pay-badge">PhonePe</span>
-                  <span className="pay-badge">Paytm</span>
-                  <span className="pay-badge">Cards &amp; NetBanking</span>
-                </div>
-              </div>
-
-              {paymentSuccess ? (
-                <div className="payment-success-badge">
-                  <CheckCircle2 size={24} />
-                  <span>Payment Verified! Opening Your Kit...</span>
-                </div>
-              ) : (
-                <button
-                  className="btn-pay-now"
-                  onClick={handlePayment}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <><RefreshCw className="spin" size={18} /> Processing Secure Payment...</>
-                  ) : (
-                    <>Pay ₹{currentKitInfo.price} &amp; Get Instant Online Access <ChevronRight size={18} /></>
-                  )}
-                </button>
-              )}
-
-              <div className="checkout-trust-row">
-                <span>🛡️ 100% Secure Transaction</span>
-                <span>⚡ Instant Online Delivery</span>
-                <span>🕉️ Dedicated Diwali Support</span>
+        {/* STEP 2: SETUP ACCOUNT (Auth-card displayed here) */}
+        {step === 'account' && (
+          <div className="step-container step-account-view">
+            <div className="step-nav-bar">
+              <button className="btn-step-back" onClick={() => setStep('select')}>
+                <ArrowLeft size={16} /> Change Kit
+              </button>
+              <div className="step-context-pill">
+                <span>Selected: <strong>{currentKitInfo.name}</strong> (₹{currentKitInfo.price})</span>
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="checkout-section-container">
+              {!user ? (
+                /* Devotee NOT logged in: Show Signup / Access / Login Form */
+                <div className="auth-card">
+                  <div className="auth-tabs">
+                    <button
+                      className={`auth-tab ${authMode === 'signup' ? 'active' : ''}`}
+                      onClick={() => { setAuthMode('signup'); setError(''); }}
+                    >
+                      <User size={16} /> Instant Devotee Checkout
+                    </button>
+                    <button
+                      className={`auth-tab ${authMode === 'phone' ? 'active' : ''}`}
+                      onClick={() => { setAuthMode('phone'); setError(''); }}
+                    >
+                      <Phone size={16} /> Already Paid? Access via Phone
+                    </button>
+                    <button
+                      className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
+                      onClick={() => { setAuthMode('login'); setError(''); }}
+                    >
+                      <Lock size={16} /> Password Login
+                    </button>
+                  </div>
+
+                  {authMode === 'signup' ? (
+                    <form className="auth-form" onSubmit={handleSignup}>
+                      <div className="form-legend">
+                        <h4>Sign up to activate perpetual access to {currentKitInfo.name}</h4>
+                        <p>Enter your details below. You will be auto-directed to payment next.</p>
+                      </div>
+
+                      <div className="input-group">
+                        <label>Full Name *</label>
+                        <div className="input-wrapper">
+                          <User size={16} className="input-icon" />
+                          <input
+                            type="text"
+                            placeholder="e.g. Rameshwar Sharma"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="input-group">
+                        <label>Email Address *</label>
+                        <div className="input-wrapper">
+                          <Mail size={16} className="input-icon" />
+                          <input
+                            type="email"
+                            placeholder="e.g. rameshwar@gmail.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="input-group">
+                        <label>10-Digit Mobile Number *</label>
+                        <div className="input-wrapper">
+                          <Phone size={16} className="input-icon" />
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            placeholder="e.g. 9876543210"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="input-group">
+                        <label>Create Password (Optional)</label>
+                        <div className="input-wrapper">
+                          <KeyRound size={16} className="input-icon" />
+                          <input
+                            type="password"
+                            placeholder="Optional: Default will be set for mobile access"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <button className="auth-submit-btn" type="submit" disabled={loading}>
+                        {loading ? <RefreshCw className="spin" size={18} /> : (
+                          <>Create Account &amp; Proceed to Payment <ArrowRight size={18} /></>
+                        )}
+                      </button>
+                      <small className="form-privacy-note">🔒 Your personal details are strictly private and sacred.</small>
+                    </form>
+                  ) : authMode === 'phone' ? (
+                    <form className="auth-form" onSubmit={handlePhoneAccess}>
+                      <div className="form-legend">
+                        <h4>Instant Access for Paid Devotees</h4>
+                        <p>Enter your 10-digit mobile number used during purchase to unlock your sacred Puja Vidhi immediately.</p>
+                      </div>
+
+                      <div className="input-group">
+                        <label>10-Digit Mobile Number *</label>
+                        <div className="input-wrapper">
+                          <Phone size={16} className="input-icon" />
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            placeholder="e.g. 9876543210"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+
+                      <button className="auth-submit-btn" type="submit" disabled={loading}>
+                        {loading ? <RefreshCw className="spin" size={18} /> : (
+                          <>Unlock My Puja Vidhi <ArrowRight size={18} /></>
+                        )}
+                      </button>
+                      <small className="form-privacy-note">Need help? WhatsApp us at +91 9956355567</small>
+                    </form>
+                  ) : (
+                    <form className="auth-form" onSubmit={handleLogin}>
+                      <div className="form-legend">
+                        <h4>Welcome back! Login to your account</h4>
+                        <p>Access your purchased kit or complete payment.</p>
+                      </div>
+
+                      <div className="input-group">
+                        <label>Email Address or Phone *</label>
+                        <div className="input-wrapper">
+                          <Mail size={16} className="input-icon" />
+                          <input
+                            type="text"
+                            placeholder="Enter your registered email or phone"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="input-group">
+                        <label>Password *</label>
+                        <div className="input-wrapper">
+                          <KeyRound size={16} className="input-icon" />
+                          <input
+                            type="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <button className="auth-submit-btn" type="submit" disabled={loading}>
+                        {loading ? <RefreshCw className="spin" size={18} /> : (
+                          <>Login &amp; Continue <ArrowRight size={18} /></>
+                        )}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              ) : (
+                /* Already logged in devotee in Step 2 */
+                <div className="account-confirmed-card">
+                  <div className="account-user-row">
+                    <CheckCircle2 size={36} color="#2e6b35" />
+                    <div>
+                      <h3>Account Ready: {user.name}</h3>
+                      <p>{user.email || user.phone} • {user.phone ? `+91 ${user.phone}` : ''}</p>
+                    </div>
+                  </div>
+                  <div className="account-plan-row">
+                    <span>Selected Kit:</span>
+                    <strong>{currentKitInfo.name} — ₹{currentKitInfo.price}</strong>
+                  </div>
+                  <div className="account-action-buttons">
+                    <button className="btn-proceed-to-payment" onClick={() => setStep('payment')}>
+                      Proceed to Payment (₹{currentKitInfo.price}) <ArrowRight size={18} />
+                    </button>
+                    <button className="btn-switch-account" onClick={handleLogout}>
+                      Use Different Account
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: PAYMENT */}
+        {step === 'payment' && (
+          <div className="step-container step-payment-view">
+            <div className="step-nav-bar">
+              <button className="btn-step-back" onClick={() => setStep(user ? 'select' : 'account')}>
+                <ArrowLeft size={16} /> {user ? 'Change Kit' : 'Back to Account Setup'}
+              </button>
+              <div className="step-context-pill">
+                <span>Devotee: <strong>{user?.name || name}</strong></span>
+              </div>
+            </div>
+
+            <div className="checkout-section-container">
+              <div className="payment-checkout-card">
+                <div className="checkout-header">
+                  <CreditCard size={24} className="gold-icon" />
+                  <div>
+                    <h3>Complete Your Order</h3>
+                    <p>Instant activation for <strong>{user?.name || name}</strong> ({user?.email || email || user?.phone || phone})</p>
+                  </div>
+                </div>
+
+                <div className="order-summary-box">
+                  <div className="summary-line">
+                    <span>Selected Package</span>
+                    <strong>{currentKitInfo.name}</strong>
+                  </div>
+                  <div className="summary-line">
+                    <span>Regular Price</span>
+                    <span className="strikethrough">₹{currentKitInfo.origPrice}</span>
+                  </div>
+                  <div className="summary-line">
+                    <span>Diwali Festive Discount</span>
+                    <span className="green-text">-₹{currentKitInfo.origPrice - currentKitInfo.price}</span>
+                  </div>
+                  <div className="summary-divider" />
+                  <div className="summary-total">
+                    <span>Total Amount Payable:</span>
+                    <strong>₹{currentKitInfo.price}</strong>
+                  </div>
+                </div>
+
+                <div className="payment-modes-info">
+                  <span>Accepted Payment Methods:</span>
+                  <div className="payment-badges">
+                    <span className="pay-badge">UPI / QR</span>
+                    <span className="pay-badge">Google Pay</span>
+                    <span className="pay-badge">PhonePe</span>
+                    <span className="pay-badge">Paytm</span>
+                    <span className="pay-badge">Cards &amp; NetBanking</span>
+                  </div>
+                </div>
+
+                {paymentSuccess ? (
+                  <div className="payment-success-badge">
+                    <CheckCircle2 size={24} />
+                    <span>Payment Verified! Opening Your Kit...</span>
+                  </div>
+                ) : (
+                  <button
+                    className="btn-pay-now"
+                    onClick={handlePayment}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <><RefreshCw className="spin" size={18} /> Processing Secure Payment...</>
+                    ) : (
+                      <>Pay ₹{currentKitInfo.price} &amp; Get Instant Online Access <ChevronRight size={18} /></>
+                    )}
+                  </button>
+                )}
+
+                <div className="checkout-trust-row">
+                  <span>🛡️ 100% Secure Transaction</span>
+                  <span>⚡ Instant Online Delivery</span>
+                  <span>🕉️ Dedicated Diwali Support</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
