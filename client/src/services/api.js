@@ -125,21 +125,26 @@ export const api = {
     return data;
   },
 
-  async createOrder({ plan }) {
+  async getProducts() {
+    return apiRequest('/products');
+  },
+
+  async createOrder({ plan, productId }) {
     return apiRequest('/order', {
       method: 'POST',
-      body: JSON.stringify({ plan })
+      body: JSON.stringify({ plan, productId })
     });
   },
 
-  async verifyPayment({ orderId, paymentId, signature, plan }) {
+  async verifyPayment({ orderId, paymentId, signature, plan, productId }) {
     const data = await apiRequest('/verify', {
       method: 'POST',
       body: JSON.stringify({
         razorpay_order_id: orderId,
         razorpay_payment_id: paymentId,
         razorpay_signature: signature,
-        plan
+        plan,
+        productId
       })
     });
     if (data.user) authStorage.setUser(data.user);

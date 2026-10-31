@@ -7,12 +7,59 @@ import {
 import { api, authStorage } from '../services/api';
 import ProtectedVidhiViewer from './ProtectedVidhiViewer';
 
+const defaultKits = [
+  {
+    id: 'kit',
+    productId: null,
+    name: 'Poojan Vidhi Kit',
+    subtitle: 'Complete Diwali Lakshmi-Ganesh Puja Digital Guide',
+    price: 21,
+    origPrice: 199,
+    savings: 'Save 89%',
+    badge: 'Essential Guide',
+    featured: false,
+    hasVideoAccess: false,
+    features: [
+      'Complete Step-by-Step Diwali Lakshmi-Ganesh Vidhi',
+      'Detailed Samagri Checklist with Household Substitutes',
+      'Sacred Sanskrit Mantras with Hindi & English Meanings',
+      'Chowki & Kalash Sthapana Illustrated Diagram',
+      'Diwali Muhurat & Sthir Lagna Guide',
+      'Perpetual Digital Access for Your Family'
+    ]
+  },
+  {
+    id: 'video_kit',
+    productId: null,
+    name: 'Poojan Vidhi Video + Poojan Kit',
+    subtitle: 'Premium Masterclass: Video Walkthrough + Sacred Kit',
+    price: 51,
+    origPrice: 299,
+    savings: 'Save 83%',
+    badge: '🌟 Most Popular & Recommended',
+    featured: true,
+    hasVideoAccess: true,
+    features: [
+      'Everything in the Poojan Vidhi Kit',
+      'Full HD Step-by-Step Video Walkthrough of Every Puja Stage',
+      'Audio Guide for Accurate Sanskrit Mantra Pronunciation',
+      'Printable Sacred Aarti Sangrah',
+      'Family Sankalp & Deepdaan Sacred Traditions Guide',
+      'Priority Festive Guidance & Unlimited Cloud Access'
+    ]
+  }
+];
+
 export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
   const [selectedKit, setSelectedKit] = useState(initialKit); // 'kit' or 'video_kit'
   const [user, setUser] = useState(authStorage.getUser());
   const [authMode, setAuthMode] = useState('signup'); // 'signup' or 'login'
   const [step, setStep] = useState('select'); // 'select', 'payment', 'access'
   
+  // Dynamic products from server
+  const [dbProducts, setDbProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
   // Form fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +71,25 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
   const [contentData, setContentData] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Check login on mount and verify with server
+  // Fetch dynamic products on mount
+  useEffect(() => {
+    let isMounted = true;
+    api.getProducts()
+      .then(res => {
+        if (isMounted && res?.products && Array.isArray(res.products) && res.products.length > 0) {
+          setDbProducts(res.products);
+        }
+      })
+      .catch(err => {
+        console.warn('Could not fetch products from server, using default active products:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingProducts(false);
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Check login on mount and verify with server (DO NOT AUTO-JUMP to access viewer)
   useEffect(() => {
     const token = authStorage.getToken();
     if (token) {
@@ -32,12 +97,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         .then(res => {
           if (res?.user) {
             setUser(res.user);
-            if (res.user.paid) {
-              setStep('access');
-              loadContent();
-            } else {
-              setStep('payment');
-            }
+            // Notice: We deliberately keep step = 'select' so user can view storefront/prices
           }
         })
         .catch(() => {
@@ -46,6 +106,39 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         });
     }
   }, []);
+
+  // Compute dynamic kits mapped from server database
+  const activeProducts = dbProducts.filter(p => p.isActive);
+  const kits = activeProducts.length > 0
+    ? activeProducts.map((p) => {
+        const isVideo = p.type === 'video_kit' || p.hasVideoAccess;
+        const planId = isVideo ? 'video_kit' : 'kit';
+        const origPrice = p.origPrice || (p.price > 50 ? p.price * 2 : 199);
+        const savingsPercent = origPrice > p.price ? Math.round(((origPrice - p.price) / origPrice) * 100) : 0;
+        return {
+          id: planId,
+          productId: p._id,
+          slug: p.slug,
+          name: p.name,
+          subtitle: p.subtitle,
+          price: p.price,
+          origPrice: origPrice,
+          savings: savingsPercent > 0 ? `Save ${savingsPercent}%` : '',
+          badge: p.badge || (isVideo ? '🌟 Most Popular & Recommended' : 'Essential Guide'),
+          featured: isVideo,
+          hasVideoAccess: p.hasVideoAccess,
+          type: p.type,
+          features: p.features && p.features.length > 0 ? p.features : [
+            'Complete Step-by-Step Diwali Lakshmi-Ganesh Vidhi',
+            'Detailed Samagri Checklist with Household Substitutes',
+            'Sacred Sanskrit Mantras with Hindi & English Meanings',
+            'Perpetual Digital Access for Your Family'
+          ]
+        };
+      })
+    : defaultKits;
+
+  const currentKitInfo = kits.find(k => k.id === selectedKit || k.productId === selectedKit) || kits[0];
 
   const loadContent = async () => {
     try {
@@ -82,7 +175,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
       setUser(res.user);
       
       // Auto direct based on user status
-      if (res.user.paid && res.user.plan === selectedKit) {
+      if (res.user.paid && (res.user.plan === selectedKit || res.user.hasVideoAccess)) {
         setStep('access');
         await loadContent();
       } else {
@@ -117,7 +210,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
 
       setUser(res.user);
 
-      if (res.user.paid && res.user.plan === selectedKit) {
+      if (res.user.paid && (res.user.plan === selectedKit || res.user.hasVideoAccess)) {
         setStep('access');
         await loadContent();
       } else {
@@ -152,8 +245,11 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
       setLoading(true);
       setError('');
 
-      // 1. Create order on backend
-      const orderData = await api.createOrder({ plan: selectedKit });
+      // 1. Create order on backend with dynamic product & price
+      const orderData = await api.createOrder({
+        plan: currentKitInfo.id,
+        productId: currentKitInfo.productId
+      });
 
       // 2. Launch Razorpay modal if live key or real test key available
       if (orderData.key && !orderData.key.includes('simulated')) {
@@ -164,11 +260,10 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
 
         const options = {
           key: orderData.key,
-          amount: orderData.amount,
+          amount: orderData.amount, // Exact dynamic amount in paise from server
           currency: 'INR',
           name: 'Poojan Vidhi',
-          description: selectedKit === 'video_kit' ? 'Poojan Vidhi Video + Poojan Kit' : 'Poojan Vidhi Kit',
-          image: '/images/lakshmi.webp',
+          description: orderData.productTitle || currentKitInfo.name,
           order_id: orderData.orderId,
           prefill: {
             name: currentUser?.name || name || '',
@@ -185,7 +280,8 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
                 orderId: response.razorpay_order_id,
                 paymentId: response.razorpay_payment_id,
                 signature: response.razorpay_signature,
-                plan: selectedKit
+                plan: currentKitInfo.id,
+                productId: currentKitInfo.productId
               });
 
               setUser(verifyRes.user);
@@ -223,7 +319,8 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
         orderId: orderData.orderId,
         paymentId: 'pay_' + Math.random().toString(36).substring(2, 10),
         signature: 'simulated_sig',
-        plan: selectedKit
+        plan: currentKitInfo.id,
+        productId: currentKitInfo.productId
       });
 
       setUser(verifyRes.user);
@@ -245,60 +342,24 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
 
   const handleLogout = () => {
     api.logout();
+    authStorage.clear();
     setUser(null);
-    setStep('select');
     setContentData(null);
+    setStep('select');
   };
 
-  // If user is viewing protected content
-  if (step === 'access' && (user?.paid || contentData)) {
+  // If user explicitly opened protected content
+  if (step === 'access' && user && (user.paid || contentData)) {
     return (
       <ProtectedVidhiViewer
         user={user}
         contentData={contentData}
-        onBack={() => setStep('payment')}
+        onBack={() => setStep('select')}
         onRefresh={loadContent}
+        onLogout={handleLogout}
       />
     );
   }
-
-  const kits = [
-    {
-      id: 'kit',
-      name: 'Poojan Vidhi Kit',
-      subtitle: 'Complete Diwali Lakshmi-Ganesh Puja Digital Guide',
-      price: 51,
-      origPrice: 199,
-      badge: 'Essential Guide',
-      features: [
-        'Complete Step-by-Step Diwali Lakshmi-Ganesh Vidhi',
-        'Detailed Samagri Checklist with Household Substitutes',
-        'Sacred Sanskrit Mantras with Hindi & English Meanings',
-        'Chowki & Kalash Sthapana Illustrated Diagram',
-        'Diwali Muhurat & Sthir Lagna Guide',
-        'Perpetual Digital Access for Your Family'
-      ]
-    },
-    {
-      id: 'video_kit',
-      name: 'Poojan Vidhi Video + Poojan Kit',
-      subtitle: 'Premium Masterclass: Video Walkthrough + Sacred Kit',
-      price: 121,
-      origPrice: 499,
-      badge: '🌟 Most Popular & Recommended',
-      featured: true,
-      features: [
-        'Everything in the Poojan Vidhi Kit',
-        'Full HD Step-by-Step Video Walkthrough of Every Puja Stage',
-        'Audio Guide for Accurate Sanskrit Mantra Pronunciation',
-        'Printable Sacred Aarti Sangrah',
-        'Family Sankalp & Deepdaan Sacred Traditions Guide',
-        'Priority Festive Guidance & Unlimited Cloud Access'
-      ]
-    }
-  ];
-
-  const currentKitInfo = kits.find(k => k.id === selectedKit) || kits[1];
 
   return (
     <div className="buy-page-root">
@@ -364,6 +425,52 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
           </p>
         </div>
 
+        {/* If user is logged in and already paid, show friendly banner */}
+        {user?.paid && (
+          <div style={{
+            background: 'linear-gradient(135deg, #fef4e8, #fdf0db)',
+            border: '2px solid #c69a43',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            boxShadow: '0 4px 12px rgba(143, 33, 28, 0.08)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <CheckCircle2 size={32} color="#8f211c" />
+              <div>
+                <strong style={{ color: '#8f211c', fontSize: '16px', display: 'block' }}>
+                  🙏 Auspicious Access Active for {user.name}
+                </strong>
+                <span style={{ fontSize: '13px', color: '#6d5345' }}>
+                  You have lifetime sacred access to <strong>{user.plan === 'video_kit' ? 'Poojan Vidhi Video + Kit' : 'Poojan Vidhi Kit'}</strong>.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => { setStep('access'); loadContent(); }}
+              style={{
+                background: '#8f211c',
+                color: '#fff',
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: '8px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <BookOpen size={16} /> Open Sacred Vidhi ➔
+            </button>
+          </div>
+        )}
+
         {error && (
           <div className="buy-error-banner">
             <AlertCircle size={18} />
@@ -371,13 +478,13 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
           </div>
         )}
 
-        {/* Step 1: Select Kit */}
+        {/* Step 1: Select Kit (Dynamic from Database) */}
         <div className="kits-grid-container">
           {kits.map((kit) => {
-            const isSelected = selectedKit === kit.id;
+            const isSelected = selectedKit === kit.id || selectedKit === kit.productId;
             return (
               <div
-                key={kit.id}
+                key={kit.productId || kit.id}
                 className={`kit-card ${kit.featured ? 'featured' : ''} ${isSelected ? 'selected' : ''}`}
                 onClick={() => setSelectedKit(kit.id)}
               >
@@ -390,8 +497,12 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
                 <div className="kit-pricing">
                   <span className="currency">₹</span>
                   <span className="amount">{kit.price}</span>
-                  <span className="original">₹{kit.origPrice}</span>
-                  <span className="savings">Save 75%</span>
+                  {kit.origPrice > kit.price && (
+                    <span className="original">₹{kit.origPrice}</span>
+                  )}
+                  {kit.savings && (
+                    <span className="savings">{kit.savings}</span>
+                  )}
                 </div>
 
                 <ul className="kit-features-list">
@@ -642,4 +753,3 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
     </div>
   );
 }
-

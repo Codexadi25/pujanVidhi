@@ -7,6 +7,7 @@ const s = new Schema({
   password: String,
   paid: { type: Boolean, default: false },
   plan: { type: String, default: 'kit' }, // 'kit' (Poojan Vidhi Kit) or 'video_kit' (Poojan Vidhi Video + Poojan Kit)
+  hasVideoAccess: { type: Boolean, default: false },
   orderId: String,
   paymentId: String,
   paidAt: Date
@@ -19,6 +20,7 @@ s.methods.toPublic = function () {
     phone: this.phone,
     paid: this.paid,
     plan: this.plan,
+    hasVideoAccess: this.hasVideoAccess,
     paidAt: this.paidAt
   };
 };

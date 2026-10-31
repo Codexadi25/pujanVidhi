@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Lock, Video, CheckCircle, ArrowLeft, RefreshCw, Volume2, Sparkles, BookOpen } from 'lucide-react';
+import { ShieldAlert, Lock, Video, CheckCircle, ArrowLeft, RefreshCw, Volume2, Sparkles, BookOpen, LogOut } from 'lucide-react';
+import { authStorage } from '../services/api';
 
-export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh }) {
+export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh, onLogout }) {
   const [shielded, setShielded] = useState(false);
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState('hi'); // 'hi' or 'en'
@@ -114,10 +115,10 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
     };
   }, []);
 
-  const hasVideo = contentData?.hasVideoAccess || user?.plan === 'video_kit';
-
-  // Extract Hindi / English sections if provided, or show complete HTML
+  const hasVideo = contentData?.hasVideoAccess || user?.hasVideoAccess || user?.plan === 'video_kit';
   const rawHtml = contentData?.html || '';
+  const token = authStorage.getToken();
+  const videoSrc = `/api/v1/content/video?token=${encodeURIComponent(token)}`;
 
   return (
     <div className="protected-viewer-root" ref={containerRef}>
@@ -128,6 +129,25 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
             display: none !important;
             visibility: hidden !important;
           }
+        }
+        .viewer-logout-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: rgba(143, 33, 28, 0.12);
+          border: 1px solid rgba(143, 33, 28, 0.3);
+          color: #8f211c;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-left: 10px;
+        }
+        .viewer-logout-btn:hover {
+          background: #8f211c;
+          color: #fff;
         }
       `}</style>
 
@@ -155,7 +175,7 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
       <div className="viewer-header">
         <div className="viewer-nav">
           <button className="viewer-back-btn" onClick={onBack}>
-            <ArrowLeft size={16} /> Back to Overview
+            <ArrowLeft size={16} /> Back to Kit Store
           </button>
           <div className="viewer-badge">
             <Sparkles size={14} />
@@ -171,6 +191,11 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
           <div className="user-owner">
             <span>Blessed for: <strong>{user?.name || contentData?.name}</strong></span>
           </div>
+          {onLogout && (
+            <button className="viewer-logout-btn" onClick={onLogout} title="Log Out">
+              <LogOut size={13} /> Logout
+            </button>
+          )}
         </div>
       </div>
 
@@ -195,7 +220,10 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
                 disablePictureInPicture
                 className="protected-video-player"
                 poster="/images/banner.jpg"
+                playsInline
+                preload="metadata"
               >
+                <source src={videoSrc} type="video/mp4" />
                 <source src="/images/lights.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
@@ -252,4 +280,3 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
     </div>
   );
 }
-

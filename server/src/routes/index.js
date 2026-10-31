@@ -31,5 +31,10 @@ r.post('/order', auth, p.createOrder);
 r.post('/verify', auth, p.verify);
 r.post('/pay-test', auth, p.payTest);
 r.get('/content', auth, c.getContent);
+r.get('/content/video', c.streamVideo);
+
+// Admin Content Editing
+r.get('/admin/content', admin, c.getAdminContent);
+r.put('/admin/content', admin, c.updateAdminContent);
 
 module.exports = r;

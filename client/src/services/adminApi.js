@@ -135,6 +135,17 @@ export const adminApi = {
     });
   },
 
+  async getContent() {
+    return adminRequest('/admin/content');
+  },
+
+  async updateContent(content) {
+    return adminRequest('/admin/content', {
+      method: 'PUT',
+      body: JSON.stringify({ content })
+    });
+  },
+
   logout() {
     adminStorage.clear();
   }

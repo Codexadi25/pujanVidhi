@@ -1,7 +1,5 @@
 /files
-/lovable-routes.js
-/lovable-styles.css
-/lovable-vidhi-page.js
-/lovable-vidhi.js
+
 /package.json
 node_modules/
+.env

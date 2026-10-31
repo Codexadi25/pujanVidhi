@@ -27,7 +27,9 @@ import {
   Key as KeyIcon,
   ContentCopy as CopyIcon,
   Storefront as StoreIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  MenuBook as MenuBookIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
 import { adminApi, adminStorage } from '../../services/adminApi';
 
@@ -132,6 +134,11 @@ export default function AdminDashboard({ onBackToStore }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
 
+  // Content Editor state
+  const [contentHtml, setContentHtml] = useState('');
+  const [loadingContent, setLoadingContent] = useState(false);
+  const [savingContent, setSavingContent] = useState(false);
+
   // Alerts
   const [toast, setToast] = useState({ open: false, message: '', severity: 'info' });
 
@@ -150,6 +157,31 @@ export default function AdminDashboard({ onBackToStore }) {
     loadStats();
     loadProducts();
     loadUsers();
+    loadContent();
+  };
+
+  const loadContent = async () => {
+    try {
+      setLoadingContent(true);
+      const res = await adminApi.getContent();
+      if (res?.content) setContentHtml(res.content);
+    } catch (err) {
+      console.warn('Failed to load content for editor:', err);
+    } finally {
+      setLoadingContent(false);
+    }
+  };
+
+  const handleSaveContent = async () => {
+    try {
+      setSavingContent(true);
+      await adminApi.updateContent(contentHtml);
+      showToast('Sacred Vidhi content updated and saved on server!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to save content', 'error');
+    } finally {
+      setSavingContent(false);
+    }
   };
 
   const handleAdminLogin = async (e) => {
@@ -489,6 +521,7 @@ export default function AdminDashboard({ onBackToStore }) {
               <Tab icon={<DashboardIcon />} iconPosition="start" label="Dashboard Overview" />
               <Tab icon={<ProductsIcon />} iconPosition="start" label={`Products (${products.length})`} />
               <Tab icon={<UsersIcon />} iconPosition="start" label={`User Details (${totalUsersCount})`} />
+              <Tab icon={<MenuBookIcon />} iconPosition="start" label="Vidhi Content Editor" />
             </Tabs>
           </Paper>
 
@@ -926,6 +959,68 @@ export default function AdminDashboard({ onBackToStore }) {
                   }}
                 />
               </TableContainer>
+            </Box>
+          )}
+
+          {/* TAB 3: SACRED VIDHI CONTENT EDITOR */}
+          {currentTab === 3 && (
+            <Box>
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, flexWrap: 'wrap', gap: 2 }}>
+                  <Box>
+                    <Typography variant="h6" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <MenuBookIcon /> Sacred Poojan Vidhi Content Editor
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Edit the Hindi &amp; English Vidhi instructions, Samagri list, and Mantras delivered to paid clients. Changes take effect on the server immediately.
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={1.5}>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      startIcon={<RefreshIcon />}
+                      onClick={loadContent}
+                      disabled={loadingContent}
+                    >
+                      Reload
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<SaveIcon />}
+                      onClick={handleSaveContent}
+                      disabled={savingContent || loadingContent}
+                    >
+                      {savingContent ? 'Saving Changes...' : 'Save Content to Server'}
+                    </Button>
+                  </Stack>
+                </Box>
+
+                {loadingContent ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <CircularProgress color="primary" />
+                  </Box>
+                ) : (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={22}
+                    value={contentHtml}
+                    onChange={(e) => setContentHtml(e.target.value)}
+                    placeholder="Sacred Vidhi HTML / Content template..."
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        fontFamily: 'Consolas, "Courier New", monospace',
+                        fontSize: 13,
+                        lineHeight: 1.6,
+                        bgcolor: '#faf8f5'
+                      }
+                    }}
+                  />
+                )}
+              </Paper>
             </Box>
           )}
         </Container>

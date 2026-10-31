@@ -1,6 +1,6 @@
 const express = require('express'), cors = require('cors'), helmet = require('helmet'), rateLimit = require('express-rate-limit'), path = require('path'), fs = require('fs');
 const env = require('./config/env'), routes = require('./routes'), { webhook } = require('./controllers/payment.controller'), { notFound, errorHandler } = require('./middleware/error');
-const adm = require('./controllers/admin.controller'), admin = require('./middleware/admin'), s = require('./controllers/settings.controller');
+const adm = require('./controllers/admin.controller'), admin = require('./middleware/admin'), s = require('./controllers/settings.controller'), c = require('./controllers/content.controller');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -26,6 +26,8 @@ adminApiRouter.post('/products', admin, adm.addProduct);
 adminApiRouter.put('/products/:id', admin, adm.updateProduct);
 adminApiRouter.delete('/products/:id', admin, adm.deleteProduct);
 adminApiRouter.put('/price', admin, s.setPrice);
+adminApiRouter.get('/content', admin, c.getAdminContent);
+adminApiRouter.put('/content', admin, c.updateAdminContent);
 
 // Mount Admin API on /admin/api and /admin (for JSON API requests)
 app.use('/admin/api', adminApiRouter);
