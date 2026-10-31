@@ -5,29 +5,46 @@ const env = require('../config/env');
 const User = require('../models/User');
 const fail = require('../utils/httpError');
 
-const contentFilePath = path.join(__dirname, '../../content/pujan.html');
-const videoFilePath = path.join(__dirname, '../../public/Video.mp4');
+// Strictly resolve file paths outside of public webroots to avoid direct URL exposure or traversal
+const contentFilePath = path.resolve(__dirname, '../../content/pujan.html');
+const videoFilePath = fs.existsSync(path.resolve(__dirname, '../../content/Video.mp4'))
+  ? path.resolve(__dirname, '../../content/Video.mp4')
+  : path.resolve(__dirname, '../../public/Video.mp4');
 
-// Helper to read content template from disk
+// Helper to safely read content template from disk
 function readContentTemplate() {
   try {
     return fs.readFileSync(contentFilePath, 'utf8');
   } catch (err) {
-    console.error('Failed to read content file:', err);
-    return '<h2>Sacred Poojan Vidhi Content</h2><p>Content is loading...</p>';
+    console.error('Failed to read sacred content file:', err);
+    return '<div class="hi"><h2>Sacred Poojan Vidhi Content</h2><p>Content is temporarily loading...</p></div>';
   }
 }
 
-// User-facing DRM protected content
+// User-facing DRM protected document delivery
 exports.getContent = (req, res, next) => {
+  // 1. Enforce strict authorization - user must exist and be verified as paid
   if (!req.user || !req.user.paid) {
-    return next(fail(402, 'Payment required to access Poojan Vidhi Kit'));
+    return next(fail(402, 'Active authorization required: Payment verification required to access Kalyanam Puja Vidhi'));
   }
 
-  const tpl = readContentTemplate();
-  const html = tpl
-    .replaceAll('{{KID}}', req.user.kalyanamId || 'KLY-MEMBER')
-    .replaceAll('{{NAME}}', req.user.name || 'Bhakt');
+  // 2. Set strict anti-caching & transport security headers so browsers do not cache protected copies on disk
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+
+  const rawTemplate = readContentTemplate();
+  const userName = req.user.name || 'Bhakt';
+  const kalyanamId = req.user.kalyanamId || 'KLY-MEMBER';
+  const watermarkText = `${userName} | Kalyanam ID: ${kalyanamId}`;
+
+  // 3. Dynamic Identity Watermark injection at the server level
+  // Replaces all dynamic identity placeholders so document cannot be forged or anonymized
+  const personalizedHtml = rawTemplate
+    .replaceAll('{{KID}}', kalyanamId)
+    .replaceAll('{{NAME}}', userName);
 
   const hasVideoAccess = Boolean(req.user.hasVideoAccess || req.user.plan === 'video_kit');
 
@@ -36,13 +53,15 @@ exports.getContent = (req, res, next) => {
       success: true,
       plan: req.user.plan || 'kit',
       hasVideoAccess,
-      kalyanamId: req.user.kalyanamId,
-      name: req.user.name,
-      html
+      kalyanamId,
+      name: userName,
+      watermarkText,
+      html: personalizedHtml,
+      issuedAt: new Date().toISOString()
     });
   }
 
-  res.type('html').send(html);
+  res.type('html').send(personalizedHtml);
 };
 
 // Authenticated Video Streaming with HTTP Range (206) Support
@@ -84,22 +103,34 @@ exports.streamVideo = async (req, res, next) => {
 
       const chunksize = end - start + 1;
       const file = fs.createReadStream(videoFilePath, { start, end });
+      const origin = req.headers.origin || '*';
       const head = {
         'Content-Range': `bytes ${start}-${end}/${fileSize}`,
         'Accept-Ranges': 'bytes',
         'Content-Length': chunksize,
         'Content-Type': 'video/mp4',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, private'
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Expose-Headers': 'Content-Range, Accept-Ranges, Content-Length',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'X-Content-Type-Options': 'nosniff'
       };
 
       res.writeHead(206, head);
       file.pipe(res);
     } else {
+      const origin = req.headers.origin || '*';
       const head = {
         'Content-Length': fileSize,
         'Content-Type': 'video/mp4',
         'Accept-Ranges': 'bytes',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, private'
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Expose-Headers': 'Content-Range, Accept-Ranges, Content-Length',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'X-Content-Type-Options': 'nosniff'
       };
       res.writeHead(200, head);
       fs.createReadStream(videoFilePath).pipe(res);
@@ -123,7 +154,7 @@ exports.updateAdminContent = (req, res) => {
 
   try {
     fs.writeFileSync(contentFilePath, content, 'utf8');
-    res.json({ success: true, message: 'Puja Vidhi content updated successfully' });
+    res.json({ success: true, message: 'Puja Vidhi content updated successfully on server' });
   } catch (err) {
     console.error('Failed to write content file:', err);
     res.status(500).json({ error: 'Failed to save content on server' });

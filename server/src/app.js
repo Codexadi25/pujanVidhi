@@ -5,10 +5,15 @@ const adm = require('./controllers/admin.controller'), admin = require('./middle
 const app = express();
 app.set('trust proxy', 1);
 
-// Configure CORS to allow frontend URL and local connections
-app.use(helmet({ contentSecurityPolicy: false }), cors({
+// Configure CORS and Helmet to allow frontend URL, video streaming, and local connections
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
+}), cors({
   origin: true,
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length']
 }), rateLimit({ windowMs: 6e4, max: 200 }));
 
 app.post('/api/v1/webhook/razorpay', express.raw({ type: 'application/json' }), webhook); // raw body needed for signature

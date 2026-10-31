@@ -1,135 +1,119 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Lock, Video, CheckCircle, ArrowLeft, RefreshCw, Volume2, Sparkles, BookOpen, LogOut } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import {
+  ShieldAlert, Lock, Video, ArrowLeft, Sparkles, BookOpen, LogOut, EyeOff
+} from 'lucide-react';
 import { authStorage } from '../services/api';
+import { useContentProtection } from '../hooks/useContentProtection';
+import WatermarkOverlay from './WatermarkOverlay';
 
+/**
+ * Advanced Content Protection Document Viewer for Kalyanam Puja Documents
+ * 
+ * Implements a multi-layered defense-in-depth protection architecture:
+ * 1. Authenticated Server-Side Delivery (JWT verified, paid user access verification)
+ * 2. Dynamic Personalized Watermarking (repeating diagonal identity stamps: {{NAME}} | Kalyanam ID: {{KID}})
+ * 3. Copy, Cut, Selection, and Drag Prevention (strictly scoped to document)
+ * 4. Screen Obscuration on window blur and tab switching
+ * 5. Print & PDF Export Restriction (print-specific CSS hides sacred contents and shows restriction notice)
+ * 6. Responsive layout preserving existing classes (.wm, .en, .hi, .meta, .tip, .ill, .end)
+ */
 export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh, onLogout }) {
-  const [shielded, setShielded] = useState(false);
-  const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState('hi'); // 'hi' or 'en'
   const containerRef = useRef(null);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 3000);
-  };
+  const userName = user?.name || contentData?.name || 'Bhakt';
+  const kalyanamId = user?.kalyanamId || contentData?.kalyanamId || 'KLY-MEMBER';
 
-  // Anti-Copy, Anti-Screenshot, Anti-DevTools listeners
-  useEffect(() => {
-    // 1. Context Menu (Right Click)
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      showToast('⚠️ Right-click is disabled to protect sacred puja content.');
-      return false;
-    };
-
-    // 2. Copy, Cut, Select, Drag
-    const handleCopyCut = (e) => {
-      e.preventDefault();
-      showToast('⚠️ Copying or extracting content is disabled.');
-      return false;
-    };
-
-    const handleSelectStart = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // 3. Keyboard Shortcuts & PrintScreen
-    const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase();
-      // Block Ctrl/Cmd + C, X, S, P, U, A
-      if ((e.ctrlKey || e.metaKey) && ['c', 'x', 's', 'p', 'u', 'a'].includes(key)) {
-        e.preventDefault();
-        showToast('⚠️ Keyboard shortcuts (Copy/Save/Print) are disabled.');
-        return false;
-      }
-
-      // Block F12, Ctrl+Shift+I, Ctrl+Shift+C (DevTools)
-      if (
-        e.key === 'F12' ||
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(key))
-      ) {
-        e.preventDefault();
-        showToast('⚠️ Developer inspection is restricted.');
-        return false;
-      }
-
-      // Block PrintScreen key
-      if (e.key === 'PrintScreen' || key === 'printscreen') {
-        e.preventDefault();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText('Screenshots of sacred Poojan Vidhi are restricted.');
-        }
-        setShielded(true);
-        showToast('🔒 Screenshots are strictly prohibited.');
-        setTimeout(() => setShielded(false), 2500);
-        return false;
-      }
-    };
-
-    const handleKeyUp = (e) => {
-      if (e.key === 'PrintScreen' || e.key.toLowerCase() === 'printscreen') {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText('');
-        }
-      }
-    };
-
-    // 4. Blur / Window Switch Shield (Protects against Snipping Tool & Background Capturing)
-    const handleBlur = () => {
-      setShielded(true);
-    };
-
-    const handleFocus = () => {
-      setShielded(false);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setShielded(true);
-      } else {
-        setShielded(false);
-      }
-    };
-
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('copy', handleCopyCut);
-    window.addEventListener('cut', handleCopyCut);
-    window.addEventListener('selectstart', handleSelectStart);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('blur', handleBlur);
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('copy', handleCopyCut);
-      window.removeEventListener('cut', handleCopyCut);
-      window.removeEventListener('selectstart', handleSelectStart);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  // Advanced content protection hook (anti-copy, hotkey deterrent, tab-switch blur, print interception)
+  const { toast, isObscured, setIsObscured } = useContentProtection({
+    containerRef,
+    userName,
+    kalyanamId
+  });
 
   const hasVideo = contentData?.hasVideoAccess || user?.hasVideoAccess || user?.plan === 'video_kit';
   const rawHtml = contentData?.html || '';
   const token = authStorage.getToken();
-  const videoSrc = `/api/v1/content/video?token=${encodeURIComponent(token)}`;
+
+  const getApiUrl = (endpoint) => {
+    if (typeof window !== 'undefined' && window.location.port === '5173') {
+      return `http://localhost:5000/api/v1${endpoint}`;
+    }
+    return `/api/v1${endpoint}`;
+  };
+
+  const videoSrc = getApiUrl(`/content/video?token=${encodeURIComponent(token)}`);
 
   return (
     <div className="protected-viewer-root" ref={containerRef}>
-      {/* Print protection */}
+      {/* Scoped CSS for Content Protection and Print Restrictions */}
       <style>{`
+        /* 1. Selection & Drag Prevention */
+        .protected-viewer-root {
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+          -webkit-touch-callout: none !important;
+          touch-action: pan-y !important;
+        }
+
+        .protected-viewer-root img,
+        .protected-viewer-root svg,
+        .protected-viewer-root video {
+          -webkit-user-drag: none !important;
+          user-drag: none !important;
+          pointer-events: auto;
+        }
+
+        /* 2. Print & PDF Export Protection - Scoped strictly to this viewer */
         @media print {
-          html, body, .protected-viewer-root, * {
+          /* Hide normal sacred content when user attempts browser print / save-as-pdf */
+          .viewer-container,
+          .video-access-card,
+          .protected-html-body,
+          .viewer-header,
+          .security-toast,
+          .reader-toolbar {
             display: none !important;
             visibility: hidden !important;
           }
+
+          /* Display print restriction notice */
+          .print-restriction-notice {
+            display: block !important;
+            visibility: visible !important;
+            position: fixed !important;
+            top: 25% !important;
+            left: 8% !important;
+            right: 8% !important;
+            padding: 30px !important;
+            border: 2px dashed #8f211c !important;
+            background: #fff9f5 !important;
+            text-align: center !important;
+            color: #8f211c !important;
+            font-family: 'Cormorant Garamond', serif !important;
+          }
+
+          .print-restriction-notice h2 {
+            font-size: 24pt !important;
+            margin-bottom: 12pt !important;
+            color: #8f211c !important;
+          }
+
+          .print-restriction-notice p {
+            font-size: 14pt !important;
+            color: #38231b !important;
+            line-height: 1.5 !important;
+          }
         }
+
+        @media screen {
+          .print-restriction-notice {
+            display: none !important;
+          }
+        }
+
         .viewer-logout-btn {
           display: inline-flex;
           align-items: center;
@@ -137,41 +121,62 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
           background: rgba(143, 33, 28, 0.12);
           border: 1px solid rgba(143, 33, 28, 0.3);
           color: #8f211c;
-          padding: 4px 10px;
-          border-radius: 4px;
+          padding: 5px 12px;
+          border-radius: 6px;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
-          margin-left: 10px;
+          margin-left: 12px;
         }
         .viewer-logout-btn:hover {
           background: #8f211c;
-          color: #fff;
+          color: #ffffff;
         }
       `}</style>
 
-      {/* Floating security toast */}
+      {/* Floating Security Alert Toast */}
       {toast && (
-        <div className="security-toast">
+        <div className="security-toast" role="alert">
           <ShieldAlert size={18} />
           <span>{toast}</span>
         </div>
       )}
 
-      {/* Blur shield when window loses focus or screenshot tool activated */}
-      {shielded && (
-        <div className="screen-shield-overlay">
+      {/* Screen Shield Overlay: Activated on tab-switch or window blur to deter screen capture utilities */}
+      {isObscured && (
+        <div
+          className="screen-shield-overlay"
+          onClick={() => setIsObscured(false)}
+          title="Click to resume"
+        >
           <div className="shield-card">
-            <Lock size={42} className="shield-icon" />
+            <Lock size={44} className="shield-icon" />
             <h3>🔒 Sacred Content Protected</h3>
-            <p>Screen capture, snipping, and recording are restricted.</p>
-            <small>Click inside this window to resume your Puja Vidhi.</small>
+            <p>Screen capture, snipping, and background recording are restricted.</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+              <EyeOff size={16} />
+              <small>Click anywhere in this window to resume your Puja Vidhi.</small>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Viewer Header */}
+      {/* Print Restriction Notice (Rendered only during print preview / print workflow) */}
+      <div className="print-restriction-notice" aria-hidden="true">
+        <h2>🔒 Protected Kalyanam Sacred Document</h2>
+        <p>
+          Printing, screen-printing, and PDF exporting of this sacred document are prohibited.
+        </p>
+        <p style={{ marginTop: '15px', fontWeight: 'bold' }}>
+          Document licensed exclusively to: {userName}
+        </p>
+        <p style={{ fontSize: '11pt', color: '#666' }}>
+          Kalyanam ID: {kalyanamId} • All rights reserved
+        </p>
+      </div>
+
+      {/* Viewer Header with User Identity and Nav Controls */}
       <div className="viewer-header">
         <div className="viewer-nav">
           <button className="viewer-back-btn" onClick={onBack}>
@@ -186,13 +191,13 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
         <div className="viewer-user-meta">
           <div className="user-kalyanam">
             <span className="dot-active" />
-            <span>Kalyanam ID: <strong>{user?.kalyanamId || contentData?.kalyanamId}</strong></span>
+            <span>Kalyanam ID: <strong>{kalyanamId}</strong></span>
           </div>
           <div className="user-owner">
-            <span>Blessed for: <strong>{user?.name || contentData?.name}</strong></span>
+            <span>Blessed for: <strong>{userName}</strong></span>
           </div>
           {onLogout && (
-            <button className="viewer-logout-btn" onClick={onLogout} title="Log Out">
+            <button className="viewer-logout-btn" onClick={onLogout} title="Log Out from Sacred Viewer">
               <LogOut size={13} /> Logout
             </button>
           )}
@@ -221,10 +226,11 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
                 className="protected-video-player"
                 poster="/images/banner.jpg"
                 playsInline
-                preload="metadata"
+                preload="auto"
+                crossOrigin="anonymous"
+                src={videoSrc}
               >
                 <source src={videoSrc} type="video/mp4" />
-                <source src="/images/lights.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -235,7 +241,10 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
         )}
 
         {/* Vidhi Reader Card */}
-        <div className="content-reader-card">
+        <div className="content-reader-card" style={{ position: 'relative' }}>
+          {/* Dynamic Personalized Repeating Diagonal Watermark Overlay */}
+          <WatermarkOverlay userName={userName} kalyanamId={kalyanamId} />
+
           <div className="reader-toolbar">
             <div className="reader-title">
               <BookOpen size={18} />
@@ -257,16 +266,7 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
             </div>
           </div>
 
-          {/* Dynamic Watermark Background */}
-          <div className="watermark-overlay" aria-hidden="true">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <span key={i} className="wm-stamp">
-                {user?.kalyanamId || contentData?.kalyanamId} • {user?.name || contentData?.name} • POOJANVIDHI 2026
-              </span>
-            ))}
-          </div>
-
-          {/* DRM Protected Server HTML Content */}
+          {/* DRM Protected Server HTML Content (preserves .wm, .en, .hi, .meta, .tip, .ill, .end) */}
           <div
             className={`protected-html-body lang-view-${activeTab}`}
             dangerouslySetInnerHTML={{ __html: rawHtml }}
@@ -274,6 +274,9 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
 
           <div className="reader-footer-note">
             <p>🕉️ May Goddess Lakshmi and Lord Ganesh bless your household with joy, health and auspicious fortune. 🙏</p>
+            <small style={{ display: 'block', marginTop: '6px', opacity: 0.7 }}>
+              Licensed for personal and family puja use • Kalyanam ID: {kalyanamId}
+            </small>
           </div>
         </div>
       </div>
