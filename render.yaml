@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pujanvidhi
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+
