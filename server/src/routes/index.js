@@ -20,6 +20,7 @@ r.get('/products', adm.getProducts);
 r.post('/admin/login', adm.login);
 r.post('/admin/change-password', admin, adm.changePassword);
 r.get('/admin/stats', admin, adm.getStats);
+r.get('/admin/telemetry', admin, adm.getTelemetry);
 
 // Admin User Management
 r.get('/admin/users', admin, adm.getUsers);
@@ -30,7 +31,22 @@ r.delete('/admin/users/:id', admin, adm.deleteUser);
 
 // Admin Orders & Lifeline Diagnostics
 r.get('/admin/orders', admin, adm.getOrders);
+r.get('/admin/orders/:orderId', admin, adm.getOrderDetails);
+r.post('/admin/orders/:orderId/tag', admin, adm.addOrderTag);
+r.post('/admin/orders/:orderId/comment', admin, adm.addOrderComment);
 r.get('/admin/lifeline', admin, adm.getLifeline);
+
+// Admin Support & PG Dispute Tickets
+r.get('/admin/tickets', admin, adm.getTickets);
+r.post('/admin/tickets', admin, adm.createTicket);
+r.patch('/admin/tickets/:id', admin, adm.updateTicket);
+
+// Admin Refunds & Reversals Console
+r.get('/admin/refunds', admin, adm.getRefunds);
+r.post('/admin/refunds/process', admin, adm.processRefund);
+
+// Admin Platform Audit & Security Event Logs
+r.get('/admin/logs', admin, adm.getLogs);
 
 // Admin Product Management
 r.get('/admin/products', admin, adm.getProducts);

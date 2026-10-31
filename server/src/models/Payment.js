@@ -1,5 +1,20 @@
 const { Schema, model } = require('mongoose');
 
+const commentSchema = new Schema({
+  text: { type: String, required: true },
+  author: { type: String, default: 'Admin' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const refundRecordSchema = new Schema({
+  refundId: { type: String, required: true },
+  amount: { type: Number, required: true },
+  reason: { type: String, default: 'Devotee requested reversal' },
+  status: { type: String, default: 'processed' },
+  method: { type: String, default: 'razorpay_direct' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const paymentSchema = new Schema({
   orderId: { type: String, required: true, index: true },
   paymentId: { type: String, index: true },
@@ -26,9 +41,11 @@ const paymentSchema = new Schema({
     failedComponent: { type: String },
     diagnosticSummary: { type: String }
   },
+  tags: [{ type: String }],
+  comments: [commentSchema],
+  refunds: [refundRecordSchema],
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now }
 });
 
 module.exports = model('Payment', paymentSchema);
-
