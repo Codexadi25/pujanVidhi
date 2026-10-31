@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { content } from "./data/content";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -11,14 +11,17 @@ import Preview from "./components/Preview";
 import Trust from "./components/Trust";
 import FAQ from "./components/FAQ";
 import FinalCTA from "./components/FinalCTA";
+import ShareSection from "./components/ShareSection";
 import Footer from "./components/Footer";
-import BuyPage from "./components/BuyPage";
-import AdminDashboard from "./components/admin/AdminDashboard";
 import { useServerWakeup } from "./hooks/useServerWakeup";
+
+const BuyPage = lazy(() => import("./components/BuyPage"));
+const AdminDashboard = lazy(() => import("./components/admin/AdminDashboard"));
+const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 export default function Page() {
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("home"); // "home", "buy", "admin"
+  const [view, setView] = useState("home"); // "home", "buy", "admin", "privacy"
   const [initialKit, setInitialKit] = useState("video_kit");
   const t = content[lang];
 
@@ -42,7 +45,10 @@ export default function Page() {
         setInitialKit("video_kit");
         setView("buy");
         window.scrollTo(0, 0);
-      } else if (hash === "#home" || (hash === "" && pathname !== "/admin" && pathname !== "/buy")) {
+      } else if (hash === "#privacy" || hash === "#policies" || pathname === "/privacy") {
+        setView("privacy");
+        window.scrollTo(0, 0);
+      } else if (hash === "#home" || (hash === "" && pathname !== "/admin" && pathname !== "/buy" && pathname !== "/privacy")) {
         if (view !== "home") setView("home");
       }
     };
@@ -59,18 +65,46 @@ export default function Page() {
     window.scrollTo(0, 0);
   };
 
+  const openPrivacy = () => {
+    setView("privacy");
+    window.location.hash = "privacy";
+    window.scrollTo(0, 0);
+  };
+
   const closeToHome = () => {
     setView("home");
     window.location.hash = "home";
     window.scrollTo(0, 0);
   };
 
+  const suspenseFallback = (
+    <div style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#1a0505", color: "#d9a852" }}>
+      <p style={{ fontSize: "16px", fontWeight: "bold" }}>Loading Poojan Vidhi...</p>
+    </div>
+  );
+
   if (view === "admin") {
-    return <AdminDashboard onBackToStore={closeToHome} />;
+    return (
+      <Suspense fallback={suspenseFallback}>
+        <AdminDashboard onBackToStore={closeToHome} />
+      </Suspense>
+    );
   }
 
   if (view === "buy") {
-    return <BuyPage onBackToHome={closeToHome} initialKit={initialKit} />;
+    return (
+      <Suspense fallback={suspenseFallback}>
+        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} />
+      </Suspense>
+    );
+  }
+
+  if (view === "privacy") {
+    return (
+      <Suspense fallback={suspenseFallback}>
+        <PrivacyPolicy onBackToHome={closeToHome} />
+      </Suspense>
+    );
   }
 
   return (
@@ -88,12 +122,8 @@ export default function Page() {
         <FAQ t={t} />
         <FinalCTA t={t} onOpenBuy={() => openBuy("video_kit")} />
       </main>
-      <Footer t={t} />
-      <div style={{ textAlign: "center", padding: "10px", background: "#240b0a", fontSize: "11px", color: "#a5826b" }}>
-        <a href="#admin" style={{ color: "#d9a852", textDecoration: "underline" }}>
-          ⚙️ Admin Control Panel (MVC Server Modules)
-        </a>
-      </div>
+      <ShareSection />
+      <Footer t={t} onOpenPrivacy={openPrivacy} />
       <button
         className="mobile-sticky-cta"
         style={{ border: 0, width: "100%", cursor: "pointer" }}

@@ -62,6 +62,9 @@ if (fs.existsSync(clientDist)) {
   app.get('/buy', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
+  app.get('/privacy', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
 } else {
   // Fallback to server public static directory
   app.use('/admin', express.static(path.join(__dirname, '../public')));
