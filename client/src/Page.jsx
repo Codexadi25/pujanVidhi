@@ -16,12 +16,11 @@ import Footer from "./components/Footer";
 import { useServerWakeup } from "./hooks/useServerWakeup";
 
 const BuyPage = lazy(() => import("./components/BuyPage"));
-const AdminDashboard = lazy(() => import("./components/admin/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 export default function Page() {
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("home"); // "home", "buy", "admin", "privacy"
+  const [view, setView] = useState("home"); // "home", "buy", "privacy"
   const [initialKit, setInitialKit] = useState("video_kit");
   const t = content[lang];
 
@@ -34,10 +33,7 @@ export default function Page() {
       const hash = window.location.hash;
       const pathname = window.location.pathname.toLowerCase();
 
-      if (hash === "#admin" || pathname === "/admin" || pathname.startsWith("/admin")) {
-        setView("admin");
-        window.scrollTo(0, 0);
-      } else if (hash === "#buy" || hash === "#purchase" || hash === "#store" || pathname === "/buy") {
+      if (hash === "#buy" || hash === "#purchase" || hash === "#store" || pathname === "/buy") {
         setInitialKit("kit");
         setView("buy");
         window.scrollTo(0, 0);
@@ -48,7 +44,7 @@ export default function Page() {
       } else if (hash === "#privacy" || hash === "#policies" || pathname === "/privacy") {
         setView("privacy");
         window.scrollTo(0, 0);
-      } else if (hash === "#home" || (hash === "" && pathname !== "/admin" && pathname !== "/buy" && pathname !== "/privacy")) {
+      } else if (hash === "#home" || (hash === "" && pathname !== "/buy" && pathname !== "/privacy")) {
         if (view !== "home") setView("home");
       }
     };
@@ -82,14 +78,6 @@ export default function Page() {
       <p style={{ fontSize: "16px", fontWeight: "bold" }}>Loading Poojan Vidhi...</p>
     </div>
   );
-
-  if (view === "admin") {
-    return (
-      <Suspense fallback={suspenseFallback}>
-        <AdminDashboard onBackToStore={closeToHome} />
-      </Suspense>
-    );
-  }
 
   if (view === "buy") {
     return (

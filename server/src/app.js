@@ -52,23 +52,17 @@ app.use('/admin', (req, res, next) => {
 app.use('/api/v1', routes);
 app.use('/api', routes);
 
-// Serve built React client if available, with direct /admin support
-const clientDist = path.resolve(__dirname, '../../client/dist');
-if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
-  app.get('/admin', (req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
-  });
-  app.get('/buy', (req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
-  });
-  app.get('/privacy', (req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
-  });
-} else {
-  // Fallback to server public static directory
-  app.use('/admin', express.static(path.join(__dirname, '../public')));
-}
+// Serve Backend Admin Portal from server/public on root / and /admin
+const adminPublic = path.join(__dirname, '../public');
+app.use(express.static(adminPublic));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(adminPublic, 'index.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(adminPublic, 'index.html'));
+});
 
 app.use(notFound, errorHandler);
 module.exports = app;

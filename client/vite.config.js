@@ -24,9 +24,6 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('@mui') || id.includes('@emotion')) {
-                return 'vendor-mui';
-              }
               if (id.includes('lucide-react')) {
                 return 'vendor-lucide';
               }
