@@ -57,3 +57,4 @@ const supportTicketSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model('SupportTicket', supportTicketSchema);
+
