@@ -492,36 +492,40 @@
         const statsRes = await fetch('/api/v1/admin/stats', {
           headers: { 'x-admin-key': currentAdminKey }
         });
-        if (statsRes.status === 401) {
+        if (statsRes.status === 401 || statsRes.status === 403) {
           handleLogout();
           return;
         }
         const stats = await statsRes.json();
-        if (stats.success) {
-          document.getElementById('statTotalUsers').textContent = stats.stats.totalUsers || 0;
-          document.getElementById('statPaidUsers').textContent = stats.stats.paidUsers || 0;
-          document.getElementById('statRevenue').textContent = '₹' + (stats.stats.totalRevenue || 0);
-          document.getElementById('statProducts').textContent = stats.stats.totalProducts || 0;
-        }
+        const totalUsers = stats.totalUsers ?? stats.stats?.totalUsers ?? 0;
+        const paidUsers = stats.paidUsers ?? stats.stats?.paidUsers ?? 0;
+        const revenue = stats.estimatedRevenue ?? stats.totalRevenue ?? stats.stats?.totalRevenue ?? 0;
+        const products = stats.activeProducts ?? stats.totalProducts ?? stats.stats?.totalProducts ?? 0;
+
+        document.getElementById('statTotalUsers').textContent = totalUsers;
+        document.getElementById('statPaidUsers').textContent = paidUsers;
+        document.getElementById('statRevenue').textContent = '₹' + revenue;
+        document.getElementById('statProducts').textContent = products;
 
         // Fetch Users
         const usersRes = await fetch('/api/v1/admin/users', {
           headers: { 'x-admin-key': currentAdminKey }
         });
-        const usersData = await usersRes.json();
-        if (usersData.success) {
-          allUsers = usersData.users || [];
-          renderUsers(allUsers);
+        if (usersRes.status === 401 || usersRes.status === 403) {
+          handleLogout();
+          return;
         }
+        const usersData = await usersRes.json();
+        allUsers = Array.isArray(usersData) ? usersData : (usersData.users || []);
+        renderUsers(allUsers);
 
         // Fetch Products
         const prodRes = await fetch('/api/v1/admin/products', {
           headers: { 'x-admin-key': currentAdminKey }
         });
         const prodData = await prodRes.json();
-        if (prodData.success) {
-          renderProducts(prodData.products || []);
-        }
+        const productsList = Array.isArray(prodData) ? prodData : (prodData.products || []);
+        renderProducts(productsList);
       } catch (err) {
         console.error('Error loading dashboard data', err);
       }
