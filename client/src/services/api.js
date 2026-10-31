@@ -2,6 +2,11 @@ const getApiBase = () => {
   if (import.meta.env?.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api/v1';
   }
+  if (import.meta.env?.VITE_BACKEND_PORT) {
+    const protocol = import.meta.env.VITE_BACKEND_PROTOCOL || 'http';
+    const host = import.meta.env.VITE_BACKEND_HOST || 'localhost';
+    return `${protocol}://${host}:${import.meta.env.VITE_BACKEND_PORT}/api/v1`;
+  }
   if (typeof window !== 'undefined' && window.location.port === '5173') {
     return 'http://localhost:5000/api/v1';
   }

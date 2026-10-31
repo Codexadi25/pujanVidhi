@@ -36,6 +36,9 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
   const token = authStorage.getToken();
 
   const getApiUrl = (endpoint) => {
+    if (import.meta.env?.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api/v1' + endpoint;
+    }
     if (typeof window !== 'undefined' && window.location.port === '5173') {
       return `http://localhost:5000/api/v1${endpoint}`;
     }
