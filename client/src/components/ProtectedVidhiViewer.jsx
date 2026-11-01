@@ -267,28 +267,35 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
               </p>
             </div>
           </div>
-          <button
-            onClick={handleDownloadPdf}
-            disabled={downloading}
+          <a
+            className="btn btn-primary"
+            href="https://raw.githubusercontent.com/SafronATD/studious-disco/main/Diwali_Puja_Vidhi_Hindi.pdf"
+            download="Diwali_Puja_Vidhi_Hindi.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent('download_pdf', { format: 'pdf', title: 'Diwali_Puja_Vidhi_Hindi', source: 'github_raw' })}
             style={{
-              cursor: downloading ? 'wait' : 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
               background: '#8f211c',
               color: '#ffffff',
+              textDecoration: 'none',
               border: 'none',
               borderRadius: '8px',
               padding: '10px 18px',
               fontSize: '0.92rem',
               fontWeight: 700,
               boxShadow: '0 4px 12px rgba(143, 33, 28, 0.25)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
             }}
           >
-            <Download size={16} />
-            <span>{downloading ? 'Downloading...' : '📥 Download PDF (8.3 MB)'}</span>
-          </button>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download 
+          </a>
         </div>
 
         {/* If user purchased Video Kit, render the Video Player */}
