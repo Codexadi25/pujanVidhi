@@ -1,4 +1,4 @@
-export function renderLifelinePage() {
+ export function renderLifelinePage() {
   return `<section id="tab-lifeline" class="tab-pane">
         <div class="pane-header">
           <div>
