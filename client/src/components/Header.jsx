@@ -74,13 +74,13 @@ export default function Header({ t, lang, setLang, onOpenBuy, onOpenLogin }) {
             display: "inline-flex",
             alignItems: "center",
             gap: "6px",
-            background: "rgba(217, 168, 82, 0.12)",
-            border: "1px solid rgba(217, 168, 82, 0.4)",
-            color: "var(--gold-light, #f8dfa5)",
+            background: "rgba(143, 33, 28, 0.08)",
+            border: "1.5px solid rgba(143, 33, 28, 0.35)",
+            color: "var(--red, #8f211c)",
             padding: "8px 14px",
             borderRadius: "6px",
             fontSize: "0.88rem",
-            fontWeight: "600",
+            fontWeight: "700",
             transition: "all 0.2s ease"
           }}
           onClick={handleLoginClick}

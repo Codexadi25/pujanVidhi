@@ -19,7 +19,7 @@ import WatermarkOverlay from './WatermarkOverlay';
  * 5. Print & PDF Export Restriction (print-specific CSS hides sacred contents and shows restriction notice)
  * 6. Responsive layout preserving existing classes (.wm, .en, .hi, .meta, .tip, .ill, .end)
  */
-export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh, onLogout }) {
+export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh, onLogout, lang = 'hi' }) {
   const [activeTab, setActiveTab] = useState('hi'); // 'hi' or 'en'
   const containerRef = useRef(null);
 

@@ -1164,3 +1164,44 @@
     padding: 24px 18px;
   }
 }
+
+/* High-Contrast Login Button & Mobile Stepper Fixes */
+.login-header-btn:hover {
+  background: var(--red, #8f211c) !important;
+  color: #ffffff !important;
+  border-color: var(--red, #8f211c) !important;
+}
+
+@media (max-width: 760px) {
+  .login-header-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  .stepper-bar {
+    padding: 0 10px;
+    gap: 4px;
+    margin: 20px auto 10px;
+  }
+  .step-item {
+    font-size: 11px;
+    gap: 4px;
+  }
+  .step-num {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+  .step-line {
+    width: 14px;
+    min-width: 10px;
+    margin: 0 4px;
+  }
+  .auth-tabs {
+    flex-direction: column;
+  }
+  .auth-tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid #ebd9bf;
+  }
+}

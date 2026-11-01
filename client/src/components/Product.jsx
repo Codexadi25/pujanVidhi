@@ -13,17 +13,18 @@ import {
 import { api } from '../services/api';
 
 const actualFeatures = [
-  [FileText, "Lakshmi-Ganesh Pooja Vidhi (Complete 16-Step Shodashopachara)"],
-  [ListChecks, "Exhaustive Samagri Checklist with Kitchen & Household Substitutes"],
-  [Languages, "Sacred Sanskrit Mantras with Simple Hindi & English Meanings"],
-  [FileText, "Illustrated Chowki & Kalash Sthapana Altar Diagram"],
-  [Video, "Full HD Step-by-Step Video Walkthrough of Every Stage"],
-  [Clock3, "Diwali Shubh Muhurat & Sthir Lagna Timing Guidance"],
-  [CheckCircle2, "Printable Sacred Aarti Sangrah (Lakshmi Mata & Ganesh Ji)"],
-  [Smartphone, "Instant Cloud Access on Mobile, Tablet & Laptop (Perpetual)"]
+  [FileText, "Lakshmi-Ganesh Pooja Vidhi (Complete 16-Step Shodashopachara)", "श्री लक्ष्मी-गणेश पूजन विधि (सम्पूर्ण १६ पावन षोडशोपचार चरण)"],
+  [ListChecks, "Exhaustive Samagri Checklist with Kitchen & Household Substitutes", "सामग्री चेकलिस्ट व घरेलू विकल्प (रसोई की आम वस्तुएं)"],
+  [Languages, "Sacred Sanskrit Mantras with Simple Hindi & English Meanings", "सरल हिंदी व अंग्रेजी अर्थ सहित पवित्र संस्कृत मंत्र"],
+  [FileText, "Illustrated Chowki & Kalash Sthapana Altar Diagram", "चौकी एवं कलश स्थापना का सचित्र पावन आरेख"],
+  [Video, "Full HD Step-by-Step Video Walkthrough of Every Stage", "प्रत्येक चरण का फुल एचडी चरण-दर-चरण वीडियो वॉकथ्रू"],
+  [Clock3, "Diwali Shubh Muhurat & Sthir Lagna Timing Guidance", "दिवाली शुभ मुहूर्त एवं स्थिर लग्न समय मार्गदर्शन"],
+  [CheckCircle2, "Printable Sacred Aarti Sangrah (Lakshmi Mata & Ganesh Ji)", "प्रिंटेबल पवित्र आरती संग्रह (लक्ष्मी माता एवं गणेश जी)"],
+  [Smartphone, "Instant Cloud Access on Mobile, Tablet & Laptop (Perpetual)", "मोबाइल, टैबलेट एवं लैपटॉप पर आजीवन तुरंत एक्सेस"]
 ];
 
-export default function Product({ t, onOpenBuy }) {
+export default function Product({ t, onOpenBuy, lang = 'hi' }) {
+  const isHindi = lang === 'hi';
   const [prices, setPrices] = useState({ essential: 21, complete: 121 });
 
   useEffect(() => {
@@ -64,10 +65,10 @@ export default function Product({ t, onOpenBuy }) {
 
         <h3>{t.included}</h3>
         <ul className="included-list">
-          {actualFeatures.map(([Icon, label]) => (
-            <li key={label}>
+          {actualFeatures.map(([Icon, labelEn, labelHi]) => (
+            <li key={labelEn}>
               <Icon size={18}/>
-              <span>{label}</span>
+              <span>{isHindi ? labelHi : labelEn}</span>
             </li>
           ))}
         </ul>
@@ -77,7 +78,7 @@ export default function Product({ t, onOpenBuy }) {
             <span className="price-placeholder">
               ₹{prices.essential} / ₹{prices.complete}
             </span>
-            <small>One-time payment • Lifetime sacred family access • No subscription</small>
+            <small>{isHindi ? "एकमुश्त भुगतान • आजीवन पावन पारिवारिक एक्सेस • कोई मासिक शुल्क नहीं" : "One-time payment • Lifetime sacred family access • No subscription"}</small>
           </div>
           <button
             className="button"
@@ -89,7 +90,9 @@ export default function Product({ t, onOpenBuy }) {
         </div>
 
         <small className="disclaimer">
-          ⚡ 100% Secure Checkout via Razorpay (UPI, Google Pay, Cards, Netbanking). Instant access unlocked immediately.
+          {isHindi
+            ? "⚡ रेज़रपे द्वारा 100% सुरक्षित चेकआउट (यूपीआई, गूगल पे, कार्ड, नेटबैंकिंग)। भुगतान के तुरंत बाद एक्सेस उपलब्ध।"
+            : "⚡ 100% Secure Checkout via Razorpay (UPI, Google Pay, Cards, Netbanking). Instant access unlocked immediately."}
         </small>
       </div>
     </section>

@@ -1,10 +1,11 @@
 import React from 'react';
 import {
   ShieldCheck, ArrowLeft, Mail, Phone, Lock, FileText,
-  UserCheck, AlertCircle, HeartHandshake, Sparkles, Clock
+  UserCheck, AlertCircle, HeartHandshake, Sparkles, Clock, Languages
 } from 'lucide-react';
 
-export default function PrivacyPolicy({ onBackToHome, settings }) {
+export default function PrivacyPolicy({ onBackToHome, settings, lang = 'hi', setLang }) {
+  const isHindi = lang === 'hi';
   const supportEmail = settings?.supportEmail || 'thepoojanvidhi@gmail.com';
   const supportPhone = settings?.supportPhone || '+919956355567';
   const grievanceEmail = settings?.grievanceEmail || 'aditya.sahu2557@gmail.com';
@@ -12,11 +13,11 @@ export default function PrivacyPolicy({ onBackToHome, settings }) {
   const entityName = settings?.entityName || 'पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)';
 
   return (
-    <div className="privacy-page-root" style={{
+    <div className={`privacy-page-root ${isHindi ? 'hindi' : ''}`} style={{
       minHeight: '100vh',
       backgroundColor: '#fbf7f0',
       color: '#38231b',
-      fontFamily: '"Lato", -apple-system, sans-serif'
+      fontFamily: isHindi ? '"Noto Sans Devanagari", sans-serif' : '"Lato", -apple-system, sans-serif'
     }}>
       {/* Top Banner Navigation */}
       <header style={{
@@ -52,13 +53,13 @@ export default function PrivacyPolicy({ onBackToHome, settings }) {
               transition: 'all 0.2s'
             }}
           >
-            <ArrowLeft size={16} /> Back to Home
+            <ArrowLeft size={16} /> {isHindi ? 'मुख्य पृष्ठ पर लौटें' : 'Back to Home'}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/images/PoojanVidhi_Logo.jpeg" alt="PoojanVidhi" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #c69a43' }} />
             <span style={{
-              fontFamily: '"Cormorant Garamond", serif',
+              fontFamily: '"Noto Serif Devanagari", serif',
               fontSize: '20px',
               fontWeight: 700,
               color: '#8f211c'
@@ -67,18 +68,40 @@ export default function PrivacyPolicy({ onBackToHome, settings }) {
             </span>
           </div>
 
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '12px',
-            color: '#2e7d32',
-            fontWeight: 700,
-            background: '#e8f5e9',
-            padding: '4px 10px',
-            borderRadius: '20px'
-          }}>
-            <ShieldCheck size={14} /> 256-Bit SSL Protected
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              onClick={() => setLang && setLang(isHindi ? 'en' : 'hi')}
+              style={{
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(143, 33, 28, 0.08)',
+                border: '1.5px solid rgba(143, 33, 28, 0.3)',
+                color: '#8f211c',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 700
+              }}
+            >
+              <Languages size={15}/>
+              <span>{isHindi ? 'English' : 'हिंदी'}</span>
+            </button>
+
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12px',
+              color: '#2e7d32',
+              fontWeight: 700,
+              background: '#e8f5e9',
+              padding: '4px 10px',
+              borderRadius: '20px'
+            }}>
+              <ShieldCheck size={14} /> {isHindi ? '256-बिट SSL सुरक्षित' : '256-Bit SSL Protected'}
+            </div>
           </div>
         </div>
       </header>
@@ -98,330 +121,177 @@ export default function PrivacyPolicy({ onBackToHome, settings }) {
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '8px',
             color: '#c69a43',
             fontSize: '12px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
+            fontWeight: 800,
             letterSpacing: '1.5px',
+            textTransform: 'uppercase',
             marginBottom: '10px'
           }}>
-            <Sparkles size={14} /> Official Legal &amp; Data Protection Policy
+            <Sparkles size={16} /> {isHindi ? 'पावन दीवाली परंपरा एवं विश्वास' : 'Auspicious Diwali Traditions & Sacred Trust'}
           </div>
+
           <h1 style={{
-            fontFamily: '"Cormorant Garamond", "Noto Serif Devanagari", serif',
-            fontSize: '34px',
-            color: '#8f211c',
-            margin: '0 0 12px'
+            fontSize: '32px',
+            color: '#4b1716',
+            margin: '8px 0 16px',
+            fontFamily: '"Noto Serif Devanagari", serif',
+            fontWeight: 700
           }}>
-            Privacy Policy &amp; Security Terms
+            {isHindi ? 'गोपनीयता, डेटा सुरक्षा एवं सेवा शर्तें' : 'Privacy Policy, Data Protection & Terms'}
           </h1>
-          <p style={{ color: '#6d5345', fontSize: '15px', maxWidth: '640px', margin: '0 auto 16px', lineHeight: 1.6 }}>
-            At <strong>पूजनविधि (PoojanVidhi / Kalyanam Puja Services)</strong>, we honor your sacred traditions and protect your personal privacy with the utmost reverence, transparency, and bank-grade security standards.
+
+          <p style={{
+            color: '#6e5447',
+            fontSize: '15px',
+            lineHeight: 1.8,
+            maxWidth: '750px',
+            margin: '0 auto'
+          }}>
+            {isHindi
+              ? `${entityName} पर हम आपके व्यक्तिगत विवरण व विश्वास की सर्वोच्च मर्यादा बनाए रखते हैं। आपकी जानकारी का उपयोग केवल पूजन सामग्री व पावन एक्सेस प्रदान करने हेतु किया जाता है।`
+              : `At ${entityName}, we hold your devotional trust and privacy in the highest sacred regard. We handle your details strictly to deliver authentic Diwali Lakshmi-Ganesh Pooja guidance.`}
           </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#8c6a58' }}>
-            <Clock size={13} /> Last Updated: October 2026 • Valid for Diwali 2026 &amp; Ongoing Services
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            marginTop: '20px',
+            flexWrap: 'wrap',
+            fontSize: '13px',
+            color: '#8f211c',
+            fontWeight: 700
+          }}>
+            <span>🛡️ {isHindi ? '१००% शून्य विज्ञापन नीति' : '100% Zero-Ad Policy'}</span>
+            <span>🔒 {isHindi ? 'कभी भी तीसरे पक्ष को डेटा विक्रय नहीं' : 'Never Sold to Third Parties'}</span>
+            <span>⚡ {isHindi ? 'रेज़रपे द्वारा सुरक्षित भुगतान' : 'Razorpay Encrypted Payments'}</span>
           </div>
         </div>
 
-        {/* Quick Contact & Grievance Box */}
-        <div style={{
-          background: 'linear-gradient(135deg, #fdf8ee, #faebd7)',
-          border: '2px solid #e2ba6e',
-          borderRadius: '14px',
-          padding: '24px',
-          marginBottom: '35px',
-          boxShadow: '0 4px 15px rgba(198, 154, 67, 0.08)'
+        {/* Section 1 */}
+        <section style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ebd9c8', padding: '28px 24px', marginBottom: '22px' }}>
+          <h2 style={{ fontSize: '20px', color: '#4b1716', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <HeartHandshake size={20} color="#8f211c" />
+            {isHindi ? '1. परिचय एवं संस्था का संकल्प' : '1. Introduction & Our Sacred Commitment'}
+          </h2>
+          <p style={{ fontSize: '14px', lineHeight: 1.8, color: '#553d32', margin: 0 }}>
+            {isHindi
+              ? `यह गोपनीयता नीति एवं नियम ${entityName} (वेबसाइट: https://poojanvidhi.web.app) के लिए लागू हैं। हमारा उद्देश्य प्रत्येक हिंदू परिवार को संपूर्ण श्रद्धा, प्रामाणिक वैदिक परंपरा और पूर्ण विधि-विधान के साथ दीपावली पूजन संपन्न कराना है। हम भारतीय सूचना प्रौद्योगिकी (मध्यवर्ती दिशानिर्देश और डिजिटल मीडिया आचार संहिता) नियम, 2021 के अनुरूप पूर्ण पारदर्शिता के साथ कार्य करते हैं।`
+              : `This Privacy Policy governs ${entityName} (Platform: https://poojanvidhi.web.app). Our mission is to empower families worldwide to perform Diwali Lakshmi-Ganesh Pooja with confidence, pristine Vedic procedures, and complete peace of mind. We maintain transparency under the Indian Information Technology Rules, 2021.`}
+          </p>
+        </section>
+
+        {/* Section 2 */}
+        <section style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ebd9c8', padding: '28px 24px', marginBottom: '22px' }}>
+          <h2 style={{ fontSize: '20px', color: '#4b1716', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FileText size={20} color="#8f211c" />
+            {isHindi ? '2. एकत्र की जाने वाली जानकारी' : '2. Information We Collect'}
+          </h2>
+          <p style={{ fontSize: '14px', lineHeight: 1.8, color: '#553d32', margin: '0 0 12px' }}>
+            {isHindi
+              ? 'डिजिटल किट सक्रिय करने तथा भक्त का व्यक्तिगत कल्याणम आईडी (Kalyanam ID) उत्पन्न करने हेतु हम केवल न्यूनतम आवश्यक जानकारी लेते हैं:'
+              : 'To activate your perpetual digital kit access and assign a unique Kalyanam Member ID, we collect only minimal necessary information:'}
+          </p>
+          <ul style={{ margin: 0, paddingLeft: '22px', fontSize: '14px', lineHeight: 1.8, color: '#553d32' }}>
+            <li><strong>{isHindi ? 'पूरा नाम:' : 'Full Name:'}</strong> {isHindi ? 'दस्तावेज़ पर व्यक्तिगत वाटरमार्क व परिवार के संकल्प हेतु।' : 'To personalize your sacred guide and generate your unique devotee identity watermark.'}</li>
+            <li><strong>{isHindi ? 'ईमेल पता:' : 'Email Address:'}</strong> {isHindi ? 'डिजिटल रसीद, लॉगिन क्रेडेंशियल व सहायता हेतु।' : 'To deliver payment confirmation, login credentials, and priority support.'}</li>
+            <li><strong>{isHindi ? '10-अंकों का मोबाइल नंबर:' : '10-Digit Mobile Number:'}</strong> {isHindi ? 'मोबाइल-आधारित त्वरित लॉगिन व व्हाट्सएप सहायता हेतु।' : 'To enable passwordless mobile-based instant access and WhatsApp order assistance.'}</li>
+            <li><strong>{isHindi ? 'लेन-देन विवरण:' : 'Transaction Reference:'}</strong> {isHindi ? 'रेज़रपे ऑर्डर आईडी व पेमेंट आईडी (हम कभी कार्ड या यूपीआई पिन स्टोर नहीं करते)।' : 'Razorpay Order ID & Payment ID (we never store card numbers or UPI PINs).'}</li>
+          </ul>
+        </section>
+
+        {/* Section 3 */}
+        <section style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ebd9c8', padding: '28px 24px', marginBottom: '22px' }}>
+          <h2 style={{ fontSize: '20px', color: '#4b1716', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <UserCheck size={20} color="#8f211c" />
+            {isHindi ? '3. भुगतान प्रसंस्करण एवं रेज़रपे सुरक्षा' : '3. Payment Processing & Razorpay Security'}
+          </h2>
+          <p style={{ fontSize: '14px', lineHeight: 1.8, color: '#553d32', margin: 0 }}>
+            {isHindi
+              ? 'सभी वित्तीय भुगतान भारतीय रिज़र्व बैंक (RBI) द्वारा अधिकृत पेमेंट एग्रीगेटर Razorpay द्वारा 256-बिट SSL एन्क्रिप्शन के माध्यम से संसाधित किए जाते हैं। हम कोई भी बैंकिंग पासवर्ड, कार्ड सीवीवी या यूपीआई पिन अपने सर्वर पर न तो मांगते हैं और न ही स्टोर करते हैं।'
+              : 'All financial transactions are processed securely via RBI-authorized payment aggregator Razorpay with 256-bit SSL encryption. We never store or handle debit/credit card CVVs, net banking passwords, or UPI PINs.'}
+          </p>
+        </section>
+
+        {/* Section 4 */}
+        <section style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ebd9c8', padding: '28px 24px', marginBottom: '22px' }}>
+          <h2 style={{ fontSize: '20px', color: '#4b1716', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Lock size={20} color="#8f211c" />
+            {isHindi ? '4. डिजिटल डिलीवरी एवं धनवापसी (रिफंड) नीति' : '4. Digital Delivery & Refund Policy'}
+          </h2>
+          <p style={{ fontSize: '14px', lineHeight: 1.8, color: '#553d32', margin: '0 0 12px' }}>
+            {isHindi
+              ? 'भुगतान सफल होते ही डिजिटल पूजन विधि किट तुरंत आपके खाते में सक्रिय हो जाती है। यदि बैंक नेटवर्क या गेटवे टाइमआउट के कारण भुगतान कट जाने के बाद भी एक्सेस सक्रिय न हो, तो हमारा सिस्टम स्वतः समाधान प्रदान करता है:'
+              : 'Upon successful payment, your digital Puja guide and video access are unlocked immediately. In case of payment gateway network drops or debits without instant access:'}
+          </p>
+          <ul style={{ margin: 0, paddingLeft: '22px', fontSize: '14px', lineHeight: 1.8, color: '#553d32' }}>
+            <li>{isHindi ? 'हमारे समर्पित लाइफलाइन इंजन द्वारा स्वतः 10 मिनट के भीतर सत्यापन।' : 'Automatic PG telemetry reconciliation via our Lifeline Engine within 10 minutes.'}</li>
+            <li>{isHindi ? 'व्हाट्सएप या ईमेल पर सूचित करने पर 2 घंटे के भीतर मैन्युअल एक्सेस सक्रियण।' : 'Instant manual entitlement unlock upon WhatsApp verification within 2 hours.'}</li>
+            <li>{isHindi ? 'दोहरा भुगतान (डुप्लीकेट चार्ज) होने पर 100% राशि स्वतः मूल भुगतान खाते में 3-5 कार्यदिवसों में वापस।' : 'Duplicate charges or non-delivered entitlements are refunded 100% to the original source within 3-5 bank business days.'}</li>
+          </ul>
+        </section>
+
+        {/* Section 5: Grievance Contacts */}
+        <section style={{
+          backgroundColor: '#fff',
+          borderRadius: '16px',
+          border: '2px solid #d9b86c',
+          padding: '30px 26px',
+          marginBottom: '20px',
+          boxShadow: '0 6px 24px rgba(198, 154, 67, 0.1)'
         }}>
-          <h3 style={{
-            fontFamily: '"Cormorant Garamond", serif',
-            fontSize: '20px',
-            color: '#8f211c',
-            margin: '0 0 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <HeartHandshake size={20} color="#8f211c" /> Direct Support &amp; Grievance Contacts
-          </h3>
-          <p style={{ fontSize: '14px', color: '#543b2f', margin: '0 0 16px', lineHeight: 1.5 }}>
-            For privacy inquiries, order support, data correction, or payment assistance, reach out directly to our dedicated support desk:
+          <h2 style={{ fontSize: '22px', color: '#4b1716', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span>🏛️</span> {isHindi ? '5. वैधानिक शिकायत अधिकारी एवं संपर्क विवरण' : '5. Statutory Grievance Officer & Direct Contacts'}
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6d5447', margin: '0 0 20px', lineHeight: 1.7 }}>
+            {isHindi
+              ? 'सूचना प्रौद्योगिकी नियम, 2021 के अनुपालन में, किसी भी प्रश्न, डेटा सुधार अथवा भुगतान विवाद हेतु हमारे अधिकृत शिकायत अधिकारी से संपर्क करें:'
+              : 'Pursuant to the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, you may contact our statutory Grievance Officer:'}
           </p>
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '16px'
           }}>
-            <a
-              href={`tel:${supportPhone}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #ebd9c8',
-                textDecoration: 'none',
-                color: '#38231b',
-                transition: 'transform 0.15s, border-color 0.15s'
-              }}
-            >
-              <div style={{
-                background: '#8f211c15',
-                color: '#8f211c',
-                padding: '8px',
-                borderRadius: '6px'
-              }}>
-                <Phone size={18} />
-              </div>
-              <div>
-                <small style={{ display: 'block', fontSize: '11px', color: '#8c6a58', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Customer Support &amp; WhatsApp
-                </small>
-                <strong style={{ fontSize: '15px', color: '#8f211c' }}>{supportPhone}</strong>
-              </div>
-            </a>
+            <div style={{ background: '#fffaf2', border: '1px solid #eedbc5', borderRadius: '10px', padding: '16px' }}>
+              <small style={{ color: '#8f211c', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '6px' }}>
+                {isHindi ? 'अधिकारी एवं संस्था' : 'Officer & Entity'}
+              </small>
+              <div style={{ fontWeight: 700, fontSize: '15px', color: '#38231b' }}>{grievanceOfficer}</div>
+              <div style={{ fontSize: '13px', color: '#6d5447', marginTop: '2px' }}>{entityName}</div>
+            </div>
 
-            <a
-              href={`mailto:${grievanceEmail}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #ebd9c8',
-                textDecoration: 'none',
-                color: '#38231b',
-                transition: 'transform 0.15s, border-color 0.15s'
-              }}
-            >
-              <div style={{
-                background: '#8f211c15',
-                color: '#8f211c',
-                padding: '8px',
-                borderRadius: '6px'
-              }}>
-                <Mail size={18} />
-              </div>
-              <div>
-                <small style={{ display: 'block', fontSize: '11px', color: '#8c6a58', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Official Grievance Officer Email
-                </small>
-                <strong style={{ fontSize: '14px', color: '#8f211c', wordBreak: 'break-all' }}>{grievanceEmail}</strong>
-              </div>
-            </a>
+            <div style={{ background: '#fffaf2', border: '1px solid #eedbc5', borderRadius: '10px', padding: '16px' }}>
+              <small style={{ color: '#8f211c', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '6px' }}>
+                {isHindi ? 'आधिकारिक शिकायत ईमेल' : 'Official Grievance Email'}
+              </small>
+              <a href={`mailto:${grievanceEmail}`} style={{ fontWeight: 700, fontSize: '15px', color: '#8f211c', textDecoration: 'underline' }}>
+                {grievanceEmail}
+              </a>
+              <div style={{ fontSize: '12px', color: '#6d5447', marginTop: '2px' }}>{isHindi ? '२४ घंटे के भीतर पावती सुनिश्चित' : 'Acknowledgment within 24 hours'}</div>
+            </div>
+
+            <div style={{ background: '#fffaf2', border: '1px solid #eedbc5', borderRadius: '10px', padding: '16px' }}>
+              <small style={{ color: '#8f211c', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '6px' }}>
+                {isHindi ? 'ग्राहक सेवा व व्हाट्सएप हेल्पलाइन' : 'Customer Support & WhatsApp'}
+              </small>
+              <a href={`tel:${supportPhone.replace(/\s+/g, '')}`} style={{ fontWeight: 700, fontSize: '15px', color: '#2e7d32', textDecoration: 'none' }}>
+                {supportPhone}
+              </a>
+              <div style={{ fontSize: '12px', color: '#6d5447', marginTop: '2px' }}>{supportEmail}</div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Policy Body Sections */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '16px',
-          border: '1px solid #ebd9c8',
-          padding: '40px',
-          lineHeight: 1.8
-        }}>
-          {/* Section 1 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              1. Information We Collect
-            </h2>
-            <p style={{ margin: '0 0 12px' }}>
-              When you purchase a sacred Puja Vidhi kit or register an account on our platform, we collect the following essential information:
-            </p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li><strong>Personal Identifiers:</strong> Your full name, valid email address, and 10-digit mobile contact number.</li>
-              <li><strong>Unique Spiritual ID (Kalyanam ID):</strong> A dedicated reference code (e.g. <code>KLY3681138</code>) auto-generated to authenticate your family’s puja license and track kit access.</li>
-              <li><strong>Payment &amp; Transaction Logs:</strong> Transaction identifiers, payment timestamps, amount paid, and selected kit type (e.g. Poojan Vidhi Kit ₹21 or Video Masterclass ₹51).</li>
-              <li><strong>Technical &amp; Device Details:</strong> IP addresses and browser signatures used strictly for fraud prevention, rate limiting, and DRM security enforcement.</li>
-            </ul>
-            <div style={{
-              marginTop: '12px',
-              padding: '10px 14px',
-              background: '#f8f4ec',
-              borderRadius: '6px',
-              fontSize: '13px',
-              color: '#6d5345'
-            }}>
-              🔒 <strong>Payment Security:</strong> We do NOT store or process your sensitive credit/debit card numbers, CVVs, or UPI PINs. All financial payments are processed through Razorpay's RBI-regulated PCI-DSS Level 1 compliant gateway.
-            </div>
-          </section>
-
-          {/* Section 2 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              2. How We Use Your Information
-            </h2>
-            <p style={{ margin: '0 0 12px' }}>We utilize collected data strictly for the following legitimate purposes:</p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li><strong>Delivering Sacred Content:</strong> Granting instant, perpetual online access to step-by-step Lakshmi-Ganesh Puja Vidhi, Sanskrit Mantras, and HD video walkthroughs.</li>
-              <li><strong>Dynamic Forensic Watermarking:</strong> Embedding your authenticated Name and Kalyanam ID diagonally into sacred documents to protect the sanctity of Vedic procedures against unauthorized resale.</li>
-              <li><strong>Service Communications:</strong> Dispatching order confirmations, payment receipts, auspicious Muhurat notifications, and account credentials.</li>
-              <li><strong>Dedicated Customer Support:</strong> Assisting you via phone (<code>+919956355567</code>) and email (<code>aditya.sahu2557@gmail.com</code>).</li>
-            </ul>
-          </section>
-
-          {/* Section 3 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              3. Data Protection &amp; DRM Security
-            </h2>
-            <p style={{ margin: '0 0 12px' }}>
-              The sacred puja literature rendered through our viewer is protected under intellectual property regulations and Vedic copyright protocols:
-            </p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li><strong>Transport Encryption:</strong> All communications between your device and our servers operate through TLS 1.3 / 256-bit SSL encryption.</li>
-              <li><strong>Anti-Piracy Controls:</strong> Text selection, right-click context menus, image dragging, keyboard copy shortcuts (Ctrl+C, Ctrl+P, Ctrl+S), and automated scraping are restricted within the sacred reader.</li>
-              <li><strong>Privacy Shield:</strong> When switching tabs or minimizing the browser window, our viewer activates an obscured protective shield to deter background screen capture utilities.</li>
-            </ul>
-          </section>
-
-          {/* Section 4 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              4. Sharing &amp; Third-Party Disclosure
-            </h2>
-            <p style={{ margin: '0 0 12px' }}>
-              <strong>We do not sell, rent, or trade your personal information to any third parties for advertising or commercial marketing.</strong> Data is shared only with certified operational partners:
-            </p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li><strong>Payment Partner:</strong> Razorpay Software Private Limited for verifying and settling rupee transactions.</li>
-              <li><strong>Legal Compliance:</strong> When required by applicable Indian laws or government authorities to comply with statutory legal processes.</li>
-            </ul>
-          </section>
-
-          {/* Section 5 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              5. Cookies &amp; Local Storage
-            </h2>
-            <p style={{ margin: 0 }}>
-              We use lightweight browser <code>localStorage</code> solely to remember your login session token and purchased kit access. We do not use third-party tracking or advertising cookies. You can clear your storage anytime by clicking "Logout" in the portal.
-            </p>
-          </section>
-
-          {/* Section 6 */}
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              6. Your Privacy Rights
-            </h2>
-            <p style={{ margin: '0 0 12px' }}>Under the Digital Personal Data Protection Act and Information Technology Rules:</p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li>You have the right to review, rectify, or update your registered name, phone, or email.</li>
-              <li>You may request complete account deletion or data erasure upon conclusion of festive puja services by emailing our support desk.</li>
-            </ul>
-          </section>
-
-          {/* Section 7 */}
-          <section>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '22px',
-              color: '#8f211c',
-              borderLeft: '4px solid #c69a43',
-              paddingLeft: '12px',
-              margin: '0 0 14px'
-            }}>
-              7. Grievance Redressal &amp; Contact Desk
-            </h2>
-            <p style={{ margin: '0 0 14px' }}>
-              In accordance with the Information Technology Act, 2000 and applicable consumer protection rules, our Grievance Officer details are published below:
-            </p>
-            <div style={{
-              backgroundColor: '#faf6f0',
-              border: '1px solid #ebd9c8',
-              borderRadius: '10px',
-              padding: '20px'
-            }}>
-              <p style={{ margin: '0 0 8px' }}><strong>Officer in Charge:</strong> {grievanceOfficer}</p>
-              <p style={{ margin: '0 0 8px' }}><strong>Entity:</strong> {entityName}</p>
-              <p style={{ margin: '0 0 8px' }}>
-                <strong>Support Helpline:</strong>{' '}
-                <a href={`tel:${supportPhone}`} style={{ color: '#8f211c', fontWeight: 700 }}>
-                  {supportPhone}
-                </a>
-              </p>
-              <p style={{ margin: 0 }}>
-                <strong>Support &amp; Grievance Email:</strong>{' '}
-                <a href={`mailto:${grievanceEmail}`} style={{ color: '#8f211c', fontWeight: 700 }}>
-                  {grievanceEmail}
-                </a>
-              </p>
-            </div>
-          </section>
-        </div>
-
-        {/* Back to Home Button at Bottom */}
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <button
-            onClick={onBackToHome}
-            style={{
-              backgroundColor: '#8f211c',
-              color: '#fff',
-              border: 'none',
-              padding: '12px 28px',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 15px rgba(143, 33, 28, 0.25)',
-              transition: 'background-color 0.2s'
-            }}
-          >
-            <ArrowLeft size={18} /> Return to Homepage
-          </button>
+        <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '12px', color: '#8c7062' }}>
+          {isHindi
+            ? 'अंतिम अद्यतन: दीवाली 2026 • सूचना प्रौद्योगिकी अधिनियम, 2000 व नियम 2021 के अंतर्गत प्राधिकृत'
+            : 'Last Updated: Diwali 2026 • Fully compliant with Information Technology Act, 2000 & 2021 Rules'}
         </div>
       </main>
     </div>
   );
 }
-

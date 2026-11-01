@@ -1,7 +1,8 @@
 import React from 'react';
 import { ArrowDown, Sparkles, ArrowRight, ShieldCheck, Zap, Video, CheckCircle2 } from "lucide-react";
 
-export default function Hero({ t, onOpenBuy }) {
+export default function Hero({ t, onOpenBuy, lang = 'hi' }) {
+  const isHindi = lang === 'hi';
   return (
     <section className="hero" id="home">
       <div className="hero-pattern"/>
@@ -75,15 +76,15 @@ export default function Hero({ t, onOpenBuy }) {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#fce8c3" }}>
               <Zap size={14} style={{ color: "#d9a852", flexShrink: 0 }}/>
-              <span>Instant Phone Access</span>
+              <span>{isHindi ? "मोबाइल पर तुरंत एक्सेस" : "Instant Phone Access"}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#fce8c3" }}>
               <CheckCircle2 size={14} style={{ color: "#34d399", flexShrink: 0 }}/>
-              <span>16-Step Vedic Vidhi</span>
+              <span>{isHindi ? "१६-चरणीय वैदिक विधि" : "16-Step Vedic Vidhi"}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#fce8c3" }}>
               <Video size={14} style={{ color: "#60a5fa", flexShrink: 0 }}/>
-              <span>Full HD Video Masterclass</span>
+              <span>{isHindi ? "फुल एचडी वीडियो मास्टरक्लास" : "Full HD Video Masterclass"}</span>
             </div>
           </div>
 
@@ -107,7 +108,7 @@ export default function Hero({ t, onOpenBuy }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "16px", fontSize: "11px", color: "#e2cbb2" }}>
             <ShieldCheck size={14} style={{ color: "#34d399" }}/>
-            <span>100% Secure Checkout via UPI, Google Pay, Cards • No app download needed</span>
+            <span>{isHindi ? "यूपीआई, गूगल पे, कार्ड्स द्वारा १००% सुरक्षित चेकआउट • किसी ऐप की आवश्यकता नहीं" : "100% Secure Checkout via UPI, Google Pay, Cards • No app download needed"}</span>
           </div>
         </div>
       </div>

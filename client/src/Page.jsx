@@ -22,7 +22,13 @@ const BuyPage = lazy(() => import("./components/BuyPage"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 export default function Page() {
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem("pv_lang") || "hi";
+    } catch {
+      return "hi";
+    }
+  });
   const [view, setView] = useState("home"); // "home", "buy", "privacy"
   const [initialKit, setInitialKit] = useState("video_kit");
   const [initialTab, setInitialTab] = useState("signup");
@@ -33,7 +39,15 @@ export default function Page() {
     grievanceOfficer: 'Aditya Sahu',
     entityName: 'पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)'
   });
-  const t = content[lang];
+
+  const handleSetLang = (newLang) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem("pv_lang", newLang);
+    } catch (e) {}
+  };
+
+  const t = content[lang] || content.hi;
 
   // Continuous health heartbeat hook to keep Render warm
   useServerWakeup({ intervalMs: 180000 });
@@ -127,7 +141,14 @@ export default function Page() {
   if (view === "buy") {
     return (
       <Suspense fallback={suspenseFallback}>
-        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} initialTab={initialTab} settings={settings} />
+        <BuyPage
+          onBackToHome={closeToHome}
+          initialKit={initialKit}
+          initialTab={initialTab}
+          settings={settings}
+          lang={lang}
+          setLang={handleSetLang}
+        />
       </Suspense>
     );
   }
@@ -135,7 +156,12 @@ export default function Page() {
   if (view === "privacy") {
     return (
       <Suspense fallback={suspenseFallback}>
-        <PrivacyPolicy onBackToHome={closeToHome} settings={settings} />
+        <PrivacyPolicy
+          onBackToHome={closeToHome}
+          settings={settings}
+          lang={lang}
+          setLang={handleSetLang}
+        />
       </Suspense>
     );
   }
@@ -143,11 +169,11 @@ export default function Page() {
   return (
     <div className={lang === "hi" ? "app hindi" : "app"}>
       {/* Navigation Header */}
-      <Header t={t} lang={lang} setLang={setLang} onOpenBuy={() => openBuy("video_kit")} onOpenLogin={openLogin} />
+      <Header t={t} lang={lang} setLang={handleSetLang} onOpenBuy={() => openBuy("video_kit")} onOpenLogin={openLogin} />
 
       <main>
         {/* Section 1: Hero */}
-        <Hero t={t} onOpenBuy={() => openBuy("video_kit")} />
+        <Hero t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} />
 
         {/* Section 2: Emotional Connection */}
         <FamilyBlessings t={t} />
@@ -156,19 +182,19 @@ export default function Page() {
         <Problem t={t} lang={lang} />
 
         {/* Section 4: Product Showcase */}
-        <Product t={t} onOpenBuy={(k) => openBuy(k || "kit")} />
+        <Product t={t} onOpenBuy={(k) => openBuy(k || "kit")} lang={lang} />
 
         {/* Section 5: How It Works */}
         <Steps t={t} lang={lang} />
 
         {/* Section 6: Accessibility */}
-        <GlobalFamilies t={t} />
+        <GlobalFamilies t={t} lang={lang} />
 
         {/* Section 7: Product Preview */}
-        <Preview t={t} onOpenBuy={() => openBuy("video_kit")} />
+        <Preview t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} />
 
         {/* Section 8: Trust */}
-        <Trust t={t} />
+        <Trust t={t} lang={lang} />
 
         {/* Section 9: Pricing & Purchase */}
         <PricingSection t={t} onOpenBuy={(k) => openBuy(k || "video_kit")} lang={lang} />
@@ -184,7 +210,7 @@ export default function Page() {
       <ShareSection />
 
       {/* Footer */}
-      <Footer t={t} onOpenPrivacy={openPrivacy} settings={settings} />
+      <Footer t={t} onOpenPrivacy={openPrivacy} settings={settings} lang={lang} />
 
       {/* Mobile Sticky CTA */}
       <button
