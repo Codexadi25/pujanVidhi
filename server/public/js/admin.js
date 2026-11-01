@@ -1,49 +1,3 @@
-import { renderTelemetryPage } from './views/pages/TelemetryPageView.js';
-import { renderOrdersPage } from './views/pages/OrdersPageView.js';
-import { renderLifelinePage } from './views/pages/LifelinePageView.js';
-import { renderTicketsPage } from './views/pages/TicketsPageView.js';
-import { renderRefundsPage } from './views/pages/RefundsPageView.js';
-import { renderLogsPage } from './views/pages/LogsPageView.js';
-import { renderPricingPage } from './views/pages/PricingPageView.js';
-import { renderUsersPage } from './views/pages/UsersPageView.js';
-import { renderSettingsPage } from './views/pages/SettingsPageView.js';
-import { renderTopbar } from './views/components/TopbarView.js';
-import { renderNav } from './views/components/NavView.js';
-import { renderModals } from './views/components/ModalsView.js';
-import { renderAuthPage } from './views/components/AuthPageView.js';
-
-// Mount all modular views into DOM Shell
-function mountAdminApp() {
-  const authContainer = document.getElementById('auth-screen-container');
-  if (authContainer) authContainer.innerHTML = renderAuthPage();
-
-  const topbarContainer = document.getElementById('topbar-container');
-  if (topbarContainer) topbarContainer.innerHTML = renderTopbar();
-
-  const navContainer = document.getElementById('nav-container');
-  if (navContainer) navContainer.innerHTML = renderNav();
-
-  const pagesContainer = document.getElementById('pages-container');
-  if (pagesContainer) {
-    pagesContainer.innerHTML = [
-      renderTelemetryPage(),
-      renderOrdersPage(),
-      renderLifelinePage(),
-      renderTicketsPage(),
-      renderRefundsPage(),
-      renderLogsPage(),
-      renderPricingPage(),
-      renderUsersPage(),
-      renderSettingsPage()
-    ].join('\n');
-  }
-
-  const modalsContainer = document.getElementById('modals-container');
-  if (modalsContainer) modalsContainer.innerHTML = renderModals();
-}
-
-mountAdminApp();
-
 // State Management
     let adminToken = localStorage.getItem('poojanvidhi_admin_token') || '';
     let currentTab = 'telemetry';
@@ -815,3 +769,44 @@ mountAdminApp();
         syncLiveData();
       }
     });
+
+// Explicitly expose functions to window scope for HTML onclick/onsubmit handlers
+window.handleAuthSubmit = handleAuthSubmit;
+window.handleLogout = handleLogout;
+window.toggleTheme = toggleTheme;
+window.syncLiveData = syncLiveData;
+window.openPasswordModal = openPasswordModal;
+window.closeModal = closeModal;
+window.openModal = openModal;
+window.switchTab = switchTab;
+window.debounceOrders = debounceOrders;
+window.loadOrders = loadOrders;
+window.investigateOrder = investigateOrder;
+window.runInlineInvestigation = runInlineInvestigation;
+window.copyChip = copyChip;
+window.toggleLifelineUserAccess = toggleLifelineUserAccess;
+window.openCreateTicketModal = openCreateTicketModal;
+window.openUpdateTicketModal = openUpdateTicketModal;
+window.handleCreateTicket = handleCreateTicket;
+window.handleUpdateTicket = handleUpdateTicket;
+window.loadTickets = loadTickets;
+window.loadRefunds = loadRefunds;
+window.openDirectRefundModal = openDirectRefundModal;
+window.handleProcessRefund = handleProcessRefund;
+window.debounceLogs = debounceLogs;
+window.loadLogs = loadLogs;
+window.changeLogsPage = changeLogsPage;
+window.openAddProductModal = openAddProductModal;
+window.openEditProductModal = openEditProductModal;
+window.handleProductSubmit = handleProductSubmit;
+window.deleteProduct = deleteProduct;
+window.updateProductPrice = updateProductPrice;
+window.debounceUsers = debounceUsers;
+window.loadUsers = loadUsers;
+window.toggleDevoteePaid = toggleDevoteePaid;
+window.updateDevoteePlan = updateDevoteePlan;
+window.deleteDevotee = deleteDevotee;
+window.handlePasswordChange = handlePasswordChange;
+window.showToast = showToast;
+if (typeof saveSettings !== 'undefined') window.saveSettings = saveSettings;
+if (typeof updateSettingsPreview !== 'undefined') window.updateSettingsPreview = updateSettingsPreview;
