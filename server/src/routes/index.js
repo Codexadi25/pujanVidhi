@@ -14,6 +14,9 @@ const documentLimiter = rateLimit({
 r.get('/ping', h.ping);
 r.get('/price', s.getPrice);
 r.put('/admin/price', admin, s.setPrice);
+r.get('/settings', s.getCompanySettings);
+r.get('/admin/settings', admin, s.getCompanySettings);
+r.put('/admin/settings', admin, s.setCompanySettings);
 r.get('/products', adm.getProducts);
 
 // Admin Auth & Stats

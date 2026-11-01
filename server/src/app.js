@@ -82,6 +82,8 @@ adminApiRouter.post('/products', admin, adm.addProduct);
 adminApiRouter.put('/products/:id', admin, adm.updateProduct);
 adminApiRouter.delete('/products/:id', admin, adm.deleteProduct);
 adminApiRouter.put('/price', admin, s.setPrice);
+adminApiRouter.get('/settings', admin, s.getCompanySettings);
+adminApiRouter.put('/settings', admin, s.setCompanySettings);
 adminApiRouter.get('/content', admin, c.getAdminContent);
 adminApiRouter.put('/content', admin, c.updateAdminContent);
 

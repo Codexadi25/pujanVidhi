@@ -15,6 +15,7 @@ import FinalCTA from "./components/FinalCTA";
 import ShareSection from "./components/ShareSection";
 import Footer from "./components/Footer";
 import { useServerWakeup } from "./hooks/useServerWakeup";
+import { api } from "./services/api";
 
 const BuyPage = lazy(() => import("./components/BuyPage"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
@@ -23,10 +24,32 @@ export default function Page() {
   const [lang, setLang] = useState("en");
   const [view, setView] = useState("home"); // "home", "buy", "privacy"
   const [initialKit, setInitialKit] = useState("video_kit");
+  const [settings, setSettings] = useState({
+    supportPhone: '+919956355567',
+    supportEmail: 'thepoojanvidhi@gmail.com',
+    grievanceEmail: 'aditya.sahu2557@gmail.com',
+    grievanceOfficer: 'Aditya Sahu',
+    entityName: 'पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)'
+  });
   const t = content[lang];
 
   // Continuous health heartbeat hook to keep Render warm
   useServerWakeup({ intervalMs: 180000 });
+
+  // Fetch dynamic platform contact & grievance settings from backend server
+  useEffect(() => {
+    let isMounted = true;
+    api.getSettings()
+      .then(res => {
+        if (isMounted && res?.settings) {
+          setSettings(prev => ({ ...prev, ...res.settings }));
+        }
+      })
+      .catch(err => {
+        console.warn('Could not load company settings from server:', err);
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     const handleHash = () => {
@@ -82,7 +105,7 @@ export default function Page() {
   if (view === "buy") {
     return (
       <Suspense fallback={suspenseFallback}>
-        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} />
+        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} settings={settings} />
       </Suspense>
     );
   }
@@ -90,7 +113,7 @@ export default function Page() {
   if (view === "privacy") {
     return (
       <Suspense fallback={suspenseFallback}>
-        <PrivacyPolicy onBackToHome={closeToHome} />
+        <PrivacyPolicy onBackToHome={closeToHome} settings={settings} />
       </Suspense>
     );
   }
@@ -139,7 +162,7 @@ export default function Page() {
       <ShareSection />
 
       {/* Footer */}
-      <Footer t={t} onOpenPrivacy={openPrivacy} />
+      <Footer t={t} onOpenPrivacy={openPrivacy} settings={settings} />
 
       {/* Mobile Sticky CTA */}
       <button

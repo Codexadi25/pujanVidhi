@@ -50,7 +50,8 @@ const defaultKits = [
   }
 ];
 
-export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
+export default function BuyPage({ onBackToHome, initialKit = 'video_kit', settings }) {
+  const helpPhone = settings?.supportPhone || '+91 9956355567';
   const [selectedKit, setSelectedKit] = useState(initialKit); // 'kit' or 'video_kit'
   const [user, setUser] = useState(authStorage.getUser());
   const [authMode, setAuthMode] = useState('signup'); // 'signup', 'phone', or 'login'
@@ -720,7 +721,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
                           <>Unlock My Puja Vidhi <ArrowRight size={18} /></>
                         )}
                       </button>
-                      <small className="form-privacy-note">Need help? WhatsApp us at +91 9956355567</small>
+                      <small className="form-privacy-note">Need help? WhatsApp us at {helpPhone}</small>
                     </form>
                   ) : (
                     <form className="auth-form" onSubmit={handleLogin}>

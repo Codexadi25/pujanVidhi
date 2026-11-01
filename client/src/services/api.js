@@ -144,6 +144,10 @@ export const api = {
     return apiRequest('/products');
   },
 
+  async getSettings() {
+    return apiRequest('/settings');
+  },
+
   async createOrder({ plan, productId }) {
     return apiRequest('/order', {
       method: 'POST',

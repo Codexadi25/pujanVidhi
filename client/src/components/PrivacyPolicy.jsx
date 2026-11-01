@@ -4,9 +4,12 @@ import {
   UserCheck, AlertCircle, HeartHandshake, Sparkles, Clock
 } from 'lucide-react';
 
-export default function PrivacyPolicy({ onBackToHome }) {
-  const supportEmail = 'thepoojanvidhi@gmail.com';
-  const supportPhone = '+919956355567';
+export default function PrivacyPolicy({ onBackToHome, settings }) {
+  const supportEmail = settings?.supportEmail || 'thepoojanvidhi@gmail.com';
+  const supportPhone = settings?.supportPhone || '+919956355567';
+  const grievanceEmail = settings?.grievanceEmail || 'aditya.sahu2557@gmail.com';
+  const grievanceOfficer = settings?.grievanceOfficer || 'Aditya Sahu';
+  const entityName = settings?.entityName || 'पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)';
 
   return (
     <div className="privacy-page-root" style={{
@@ -182,7 +185,7 @@ export default function PrivacyPolicy({ onBackToHome }) {
             </a>
 
             <a
-              href={`mailto:${supportEmail}`}
+              href={`mailto:${grievanceEmail}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -208,7 +211,7 @@ export default function PrivacyPolicy({ onBackToHome }) {
                 <small style={{ display: 'block', fontSize: '11px', color: '#8c6a58', textTransform: 'uppercase', fontWeight: 700 }}>
                   Official Grievance Officer Email
                 </small>
-                <strong style={{ fontSize: '14px', color: '#8f211c', wordBreak: 'break-all' }}>{supportEmail}</strong>
+                <strong style={{ fontSize: '14px', color: '#8f211c', wordBreak: 'break-all' }}>{grievanceEmail}</strong>
               </div>
             </a>
           </div>
@@ -376,8 +379,8 @@ export default function PrivacyPolicy({ onBackToHome }) {
               borderRadius: '10px',
               padding: '20px'
             }}>
-              <p style={{ margin: '0 0 8px' }}><strong>Officer in Charge:</strong> Aditya Sahu</p>
-              <p style={{ margin: '0 0 8px' }}><strong>Entity:</strong> पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)</p>
+              <p style={{ margin: '0 0 8px' }}><strong>Officer in Charge:</strong> {grievanceOfficer}</p>
+              <p style={{ margin: '0 0 8px' }}><strong>Entity:</strong> {entityName}</p>
               <p style={{ margin: '0 0 8px' }}>
                 <strong>Support Helpline:</strong>{' '}
                 <a href={`tel:${supportPhone}`} style={{ color: '#8f211c', fontWeight: 700 }}>
@@ -386,8 +389,8 @@ export default function PrivacyPolicy({ onBackToHome }) {
               </p>
               <p style={{ margin: 0 }}>
                 <strong>Support &amp; Grievance Email:</strong>{' '}
-                <a href={`mailto:${supportEmail}`} style={{ color: '#8f211c', fontWeight: 700 }}>
-                  {supportEmail}
+                <a href={`mailto:${grievanceEmail}`} style={{ color: '#8f211c', fontWeight: 700 }}>
+                  {grievanceEmail}
                 </a>
               </p>
             </div>

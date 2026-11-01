@@ -23,6 +23,7 @@ const activityLogSchema = new mongoose.Schema(
         'REFUND_PROCESSED',
         'TICKET_CREATED',
         'TICKET_UPDATED',
+        'SETTINGS_UPDATED',
         'SECURITY_BREACH_ATTEMPT',
       ],
       default: 'ADMIN_LOGIN',
