@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 export default function PrivacyPolicy({ onBackToHome }) {
-  const supportEmail = 'aditya.sahu2557@gmail.com';
+  const supportEmail = 'thepoojanvidhi@gmail.com';
   const supportPhone = '+919956355567';
 
   return (
@@ -53,7 +53,7 @@ export default function PrivacyPolicy({ onBackToHome }) {
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '22px', color: '#c69a43' }}>ॐ</span>
+            <img src="/images/PoojanVidhi_Logo.jpeg" alt="PoojanVidhi" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #c69a43' }} />
             <span style={{
               fontFamily: '"Cormorant Garamond", serif',
               fontSize: '20px',

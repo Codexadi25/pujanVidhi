@@ -395,7 +395,7 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit' }) {
           </button>
           
           <div className="buy-brand">
-            <span className="brand-om">ॐ</span>
+            <img src="/images/PoojanVidhi_Logo.jpeg" alt="PoojanVidhi" className="brand-logo-img buy-brand-logo" />
             <span><strong>पूजनविधि</strong><small>poojanvidhi kit store</small></span>
           </div>
 

@@ -8,7 +8,7 @@ export default function Header({ t, lang, setLang, onOpenBuy }) {
   return (
     <header className="site-header">
       <a className="brand" href="#home" aria-label="PoojanVidhi Home">
-        <span className="brand-mark">🕉️</span>
+        <img src="/images/PoojanVidhi_Logo.jpeg" alt="PoojanVidhi" className="brand-logo-img" />
         <span>
           <strong>पूजन विधि</strong>
           <small>PoojanVidhi</small>
