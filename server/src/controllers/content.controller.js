@@ -64,6 +64,43 @@ exports.getContent = (req, res, next) => {
   res.type('html').send(personalizedHtml);
 };
 
+// Authenticated PDF Download for Paid Devotees
+exports.downloadPdf = async (req, res, next) => {
+  try {
+    let user = req.user;
+
+    // Support query param token for direct browser <a> downloads
+    if (!user && req.query.token) {
+      try {
+        const decoded = jwt.verify(req.query.token, env.jwtSecret);
+        user = await User.findById(decoded.id);
+      } catch (err) {
+        return res.status(401).send('Invalid or expired download session token');
+      }
+    }
+
+    if (!user || !user.paid) {
+      return res.status(403).send('Active paid plan is required to download the Diwali Puja Vidhi PDF');
+    }
+
+    const pdfPath = path.resolve(__dirname, '../../content/Diwali_Puja_Vidhi_Hindi.pdf');
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).send('Diwali Puja Vidhi PDF is not found on server');
+    }
+
+    const stat = fs.statSync(pdfPath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', stat.size);
+    res.setHeader('Content-Disposition', 'attachment; filename="Diwali_Puja_Vidhi_Hindi.pdf"');
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+
+    const stream = fs.createReadStream(pdfPath);
+    stream.pipe(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Authenticated Video Streaming with HTTP Range (206) Support
 exports.streamVideo = async (req, res, next) => {
   try {

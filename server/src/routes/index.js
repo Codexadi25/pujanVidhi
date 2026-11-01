@@ -67,6 +67,7 @@ r.post('/verify', auth, p.verify);
 r.post('/pay-test', auth, p.payTest);
 r.get('/content', auth, documentLimiter, c.getContent);
 r.get('/content/video', documentLimiter, c.streamVideo);
+r.get('/content/pdf', documentLimiter, c.downloadPdf);
 
 // Admin Content Editing
 r.get('/admin/content', admin, c.getAdminContent);

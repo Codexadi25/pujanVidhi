@@ -475,71 +475,115 @@ exports.getLifeline = asyncHandler(async (req, res) => {
   }
 
   const term = q.trim();
-  const regex = new RegExp('^' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
-  const looseRegex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp('^' + escaped + '$', 'i');
+  const looseRegex = new RegExp(escaped, 'i');
+  const cleanPhone = term.replace(/^\+91\s*|^91\s*/, '').replace(/\D/g, '');
 
-  let payment = await Payment.findOne({
-    $or: [
-      { orderId: regex },
-      { paymentId: regex },
-      { kalyanamId: regex },
-      { userEmail: regex },
-      { userPhone: regex }
-    ]
-  });
+  // 1. Locate devotee user by email, phone, kalyanamId, orderId, or paymentId
+  const userOrConditions = [
+    { email: regex },
+    { email: term.toLowerCase() },
+    { phone: regex },
+    { kalyanamId: regex },
+    { orderId: regex },
+    { paymentId: regex }
+  ];
+  if (cleanPhone) {
+    userOrConditions.push({ phone: new RegExp(cleanPhone, 'i') });
+  }
 
-  if (!payment) {
-    payment = await Payment.findOne({
+  let user = await User.findOne({ $or: userOrConditions });
+
+  // 2. Locate all orders/payments associated with this query or devotee
+  const paymentOrConditions = [
+    { orderId: regex },
+    { paymentId: regex },
+    { kalyanamId: regex },
+    { userEmail: regex },
+    { userPhone: regex }
+  ];
+  if (cleanPhone) {
+    paymentOrConditions.push({ userPhone: new RegExp(cleanPhone, 'i') });
+  }
+
+  if (user) {
+    paymentOrConditions.push({ userId: user._id });
+    if (user.email) paymentOrConditions.push({ userEmail: new RegExp('^' + user.email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') });
+    if (user.phone) paymentOrConditions.push({ userPhone: new RegExp(user.phone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') });
+    if (user.kalyanamId) paymentOrConditions.push({ kalyanamId: user.kalyanamId });
+    if (user.orderId) paymentOrConditions.push({ orderId: user.orderId });
+    if (user.paymentId) paymentOrConditions.push({ paymentId: user.paymentId });
+  }
+
+  let payments = await Payment.find({ $or: paymentOrConditions }).sort({ createdAt: -1 });
+
+  // Fallback: If no payments found with strict query, try loose query
+  if (payments.length === 0) {
+    payments = await Payment.find({
       $or: [
         { orderId: looseRegex },
         { paymentId: looseRegex },
-        { userEmail: looseRegex }
+        { userEmail: looseRegex },
+        { userPhone: looseRegex }
       ]
-    });
+    }).sort({ createdAt: -1 });
   }
 
-  let user = null;
-  if (payment?.userId) {
-    user = await User.findById(payment.userId);
-  }
-  if (!user) {
-    user = await User.findOne({
-      $or: [
-        { kalyanamId: regex },
-        { email: regex },
-        { phone: regex },
-        { orderId: regex },
-        { paymentId: regex }
-      ]
-    });
+  // If user wasn't found initially but payments exist, resolve user from payments
+  if (!user && payments.length > 0) {
+    for (const p of payments) {
+      if (p.userId) {
+        user = await User.findById(p.userId);
+        if (user) break;
+      }
+      if (p.userEmail) {
+        user = await User.findOne({ email: new RegExp('^' + p.userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') });
+        if (user) break;
+      }
+    }
   }
 
-  const tickets = await SupportTicket.find({
-    $or: [
-      { razorpayOrderId: term },
-      { razorpayPaymentId: term },
-      { userEmail: term },
-      { kalyanamId: term }
-    ]
-  });
-
-  if (!payment && !user) {
+  if (!user && payments.length === 0) {
     throw fail(404, `No records found matching identifier: "${term}"`);
   }
+
+  // 3. Locate all support tickets for this customer or orders
+  const ticketOrConditions = [
+    { razorpayOrderId: term },
+    { razorpayPaymentId: term },
+    { userEmail: term },
+    { kalyanamId: term }
+  ];
+  if (user) {
+    if (user.email) ticketOrConditions.push({ userEmail: user.email });
+    if (user.phone) ticketOrConditions.push({ userPhone: user.phone });
+    if (user.kalyanamId) ticketOrConditions.push({ kalyanamId: user.kalyanamId });
+  }
+  payments.forEach(p => {
+    if (p.orderId) ticketOrConditions.push({ razorpayOrderId: p.orderId });
+    if (p.paymentId) ticketOrConditions.push({ razorpayPaymentId: p.paymentId });
+  });
+
+  const tickets = await SupportTicket.find({ $or: ticketOrConditions }).sort({ createdAt: -1 });
+
+  // 4. Select primary payment for top diagnostic banner
+  const primaryPayment = payments.find(p => p.orderId === term || p.paymentId === term) || payments[0] || null;
 
   res.json({
     success: true,
     investigation: {
       searchTerm: term,
-      payment: payment || null,
+      payment: primaryPayment,
+      orders: payments,
       user: user || null,
       tickets: tickets || [],
-      diagnostics: payment?.diagnostics || {
+      diagnostics: primaryPayment?.diagnostics || {
         failureCategory: user?.paid ? 'Captured Successfully' : 'Payment Incomplete',
         failedComponent: user?.paid ? 'None' : 'Payment Gateway / User Action',
         diagnosticSummary: user?.paid
-          ? 'Devotee has active verified access.'
-          : 'User registered but no successful payment captured.'
+          ? 'Devotee has active verified access in MongoDB.'
+          : 'User registered but no successful payment captured on Razorpay.'
       }
     }
   });

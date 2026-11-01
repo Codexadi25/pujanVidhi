@@ -5,6 +5,7 @@ import {
   ChevronRight, ArrowLeft
 } from 'lucide-react';
 import { api, authStorage } from '../services/api';
+import { trackEvent } from '../utils/analytics';
 import ProtectedVidhiViewer from './ProtectedVidhiViewer';
 
 const defaultKits = [
@@ -50,12 +51,19 @@ const defaultKits = [
   }
 ];
 
-export default function BuyPage({ onBackToHome, initialKit = 'video_kit', settings }) {
+export default function BuyPage({ onBackToHome, initialKit = 'video_kit', initialTab = 'signup', settings }) {
   const helpPhone = settings?.supportPhone || '+91 9956355567';
   const [selectedKit, setSelectedKit] = useState(initialKit); // 'kit' or 'video_kit'
   const [user, setUser] = useState(authStorage.getUser());
-  const [authMode, setAuthMode] = useState('signup'); // 'signup', 'phone', or 'login'
-  const [step, setStep] = useState('select'); // 'select', 'account', 'payment', 'access'
+  const [authMode, setAuthMode] = useState(initialTab === 'login' ? 'login' : 'signup'); // 'signup', 'phone', or 'login'
+  const [step, setStep] = useState(initialTab === 'login' ? 'account' : 'select'); // 'select', 'account', 'payment', 'access'
+
+  useEffect(() => {
+    if (initialTab === 'login') {
+      setAuthMode('login');
+      setStep('account');
+    }
+  }, [initialTab]);
   
   // Dynamic products from server
   const [dbProducts, setDbProducts] = useState([]);
@@ -309,6 +317,12 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit', settin
                 productId: currentKitInfo.productId
               });
 
+              trackEvent('purchase', {
+                transaction_id: response.razorpay_payment_id || orderData.orderId,
+                value: currentKitInfo.price,
+                currency: 'INR',
+                items: [{ item_id: currentKitInfo.id, item_name: currentKitInfo.name, price: currentKitInfo.price }]
+              });
               setUser(verifyRes.user);
               setPaymentSuccess(true);
 
@@ -560,6 +574,8 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit', settin
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedKit(kit.id);
+                        trackEvent('select_item', { item_id: kit.id, item_name: kit.name, price: kit.price });
+                        trackEvent('begin_checkout', { item_id: kit.id, price: kit.price });
                         setStep(user ? 'payment' : 'account');
                       }}
                     >
@@ -578,7 +594,10 @@ export default function BuyPage({ onBackToHome, initialKit = 'video_kit', settin
               <button
                 type="button"
                 className="btn-proceed-to-account"
-                onClick={() => setStep(user ? 'payment' : 'account')}
+                onClick={() => {
+                  trackEvent('begin_checkout', { item_id: currentKitInfo.id, price: currentKitInfo.price });
+                  setStep(user ? 'payment' : 'account');
+                }}
               >
                 {user ? 'Proceed to Payment' : 'Proceed to Setup Account'} <ArrowRight size={18} />
               </button>

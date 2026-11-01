@@ -109,6 +109,18 @@ app.get(['/templates/lifeline', '/lifeline'], (req, res) => {
   }
 });
 
+// Server-Side React Admin Dashboard Template Endpoints (React View Engine)
+app.get(['/templates/admin', '/dashboard'], (req, res) => {
+  try {
+    res.render('AdminDashboardTemplate', {
+      title: 'PoojanVidhi Server Control Center | Backend Admin & Telemetry Hub',
+      initialTab: req.query.tab || 'telemetry'
+    });
+  } catch (err) {
+    res.status(500).send(`Failed to render Admin Dashboard Template: ${err.message}`);
+  }
+});
+
 // Mount general API routes on /api/v1 and /api
 app.use('/api/v1', routes);
 app.use('/api', routes);
@@ -117,12 +129,19 @@ app.use('/api', routes);
 const adminPublic = path.join(__dirname, '../public');
 app.use(express.static(adminPublic));
 
-// Intercept /admin: if JSON request, route to adminApiRouter; if browser HTML, serve index.html
+// Intercept /admin: if JSON request, route to adminApiRouter; if browser HTML, render React template or serve index.html
 app.use('/admin', (req, res, next) => {
   if (req.method !== 'GET' || req.headers.accept?.includes('application/json') || req.xhr) {
     return adminApiRouter(req, res, next);
   }
-  res.sendFile(path.join(adminPublic, 'index.html'));
+  res.render('AdminDashboardTemplate', {
+    title: 'PoojanVidhi Server Control Center | Backend Admin & Telemetry Hub'
+  }, (err, html) => {
+    if (err) {
+      return res.sendFile(path.join(adminPublic, 'index.html'));
+    }
+    res.send(html);
+  });
 });
 
 // Root path serves the Admin Control Center

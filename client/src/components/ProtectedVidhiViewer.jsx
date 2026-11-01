@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import {
-  ShieldAlert, Lock, Video, ArrowLeft, Sparkles, BookOpen, LogOut, EyeOff
+  ShieldAlert, Lock, Video, ArrowLeft, Sparkles, BookOpen, LogOut, EyeOff,
+  Download, FileText
 } from 'lucide-react';
-import { authStorage } from '../services/api';
+import { api, authStorage } from '../services/api';
 import { useContentProtection } from '../hooks/useContentProtection';
+import { trackEvent } from '../utils/analytics';
 import WatermarkOverlay from './WatermarkOverlay';
 
 /**
@@ -46,6 +48,27 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
   };
 
   const videoSrc = getApiUrl(`/content/video?token=${encodeURIComponent(token)}`);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = () => {
+    try {
+      setDownloading(true);
+      trackEvent('download_pdf', { format: 'pdf', title: 'Diwali_Puja_Vidhi_Hindi' });
+      const downloadUrl = api.getPdfDownloadUrl(token);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'Diwali_Puja_Vidhi_Hindi.pdf');
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      alert('Could not start download. Please try again.');
+    } finally {
+      setTimeout(() => setDownloading(false), 2000);
+    }
+  };
 
   return (
     <div className="protected-viewer-root" ref={containerRef}>
@@ -208,6 +231,66 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
       </div>
 
       <div className="viewer-container">
+        {/* PDF Download Card / Banner for Paid Devotees */}
+        <div className="pdf-download-card" style={{
+          background: 'linear-gradient(135deg, rgba(143, 33, 28, 0.08) 0%, rgba(217, 168, 82, 0.15) 100%)',
+          border: '1.5px solid rgba(217, 168, 82, 0.4)',
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginBottom: '20px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '14px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '10px',
+              background: '#8f211c',
+              color: '#f8dfa5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <FileText size={22} />
+            </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#8f211c', fontWeight: 700 }}>
+                Download Diwali Puja Vidhi PDF (Hindi)
+              </h4>
+              <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#5a4638' }}>
+                संपूर्ण दिवाली पूजन विधि, मंत्र एवं सामग्री सूची – ऑफ़लाइन अध्ययन या प्रिंट के लिए
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            style={{
+              cursor: downloading ? 'wait' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#8f211c',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 18px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              boxShadow: '0 4px 12px rgba(143, 33, 28, 0.25)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Download size={16} />
+            <span>{downloading ? 'Downloading...' : '📥 Download PDF (8.3 MB)'}</span>
+          </button>
+        </div>
+
         {/* If user purchased Video Kit, render the Video Player */}
         {hasVideo && (
           <div className="video-access-card">

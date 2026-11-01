@@ -185,6 +185,22 @@ export const api = {
     });
   },
 
+  getPdfDownloadUrl(token) {
+    const t = token || authStorage.getToken();
+    return `${API_BASE}/content/pdf?token=${encodeURIComponent(t)}`;
+  },
+
+  async downloadPdfBlob() {
+    const token = authStorage.getToken();
+    const res = await fetch(`${API_BASE}/content/pdf`, {
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
+    });
+    if (!res.ok) throw new Error('Failed to download PDF. Please verify your active access.');
+    return res.blob();
+  },
+
   async ping() {
     try {
       const data = await apiRequest('/ping');

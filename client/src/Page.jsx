@@ -16,6 +16,7 @@ import ShareSection from "./components/ShareSection";
 import Footer from "./components/Footer";
 import { useServerWakeup } from "./hooks/useServerWakeup";
 import { api } from "./services/api";
+import { trackPageView, trackEvent } from "./utils/analytics";
 
 const BuyPage = lazy(() => import("./components/BuyPage"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
@@ -24,6 +25,7 @@ export default function Page() {
   const [lang, setLang] = useState("en");
   const [view, setView] = useState("home"); // "home", "buy", "privacy"
   const [initialKit, setInitialKit] = useState("video_kit");
+  const [initialTab, setInitialTab] = useState("signup");
   const [settings, setSettings] = useState({
     supportPhone: '+919956355567',
     supportEmail: 'thepoojanvidhi@gmail.com',
@@ -58,10 +60,16 @@ export default function Page() {
 
       if (hash === "#buy" || hash === "#purchase" || hash === "#store" || pathname === "/buy") {
         setInitialKit("kit");
+        setInitialTab("signup");
         setView("buy");
         window.scrollTo(0, 0);
       } else if (hash === "#buy-video" || hash === "#buy-complete") {
         setInitialKit("video_kit");
+        setInitialTab("signup");
+        setView("buy");
+        window.scrollTo(0, 0);
+      } else if (hash === "#login" || hash === "#devotee-login" || pathname === "/login") {
+        setInitialTab("login");
         setView("buy");
         window.scrollTo(0, 0);
       } else if (hash === "#privacy" || hash === "#policies" || pathname === "/privacy") {
@@ -77,10 +85,24 @@ export default function Page() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, [view]);
 
-  const openBuy = (kit = "video_kit") => {
+  useEffect(() => {
+    trackPageView(view === 'home' ? '/' : `/${view}`, view === 'home' ? 'Poojan Vidhi Home' : view === 'buy' ? 'Kit Store' : 'Privacy Policy');
+  }, [view]);
+
+  const openBuy = (kit = "video_kit", tab = "signup") => {
+    trackEvent("cta_click", { kit, tab, location: "homepage" });
     setInitialKit(kit);
+    setInitialTab(tab);
     setView("buy");
     window.location.hash = kit === "kit" ? "buy" : "buy-video";
+    window.scrollTo(0, 0);
+  };
+
+  const openLogin = () => {
+    trackEvent("cta_click", { action: "navbar_login", location: "site_header" });
+    setInitialTab("login");
+    setView("buy");
+    window.location.hash = "login";
     window.scrollTo(0, 0);
   };
 
@@ -105,7 +127,7 @@ export default function Page() {
   if (view === "buy") {
     return (
       <Suspense fallback={suspenseFallback}>
-        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} settings={settings} />
+        <BuyPage onBackToHome={closeToHome} initialKit={initialKit} initialTab={initialTab} settings={settings} />
       </Suspense>
     );
   }
@@ -121,7 +143,7 @@ export default function Page() {
   return (
     <div className={lang === "hi" ? "app hindi" : "app"}>
       {/* Navigation Header */}
-      <Header t={t} lang={lang} setLang={setLang} onOpenBuy={() => openBuy("video_kit")} />
+      <Header t={t} lang={lang} setLang={setLang} onOpenBuy={() => openBuy("video_kit")} onOpenLogin={openLogin} />
 
       <main>
         {/* Section 1: Hero */}

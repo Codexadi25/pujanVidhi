@@ -6,7 +6,10 @@ const Admin = require('../models/Admin');
 const clean = k => (k || '').toString().trim().replace(/^["']|["']$/g, '');
 
 module.exports = async (req, res, next) => {
-  const rawKey = req.headers['x-admin-key'] || req.headers['authorization']?.replace(/^Bearer\s+/i, '');
+  const rawKey = req.headers['x-admin-key'] ||
+    req.headers['authorization']?.replace(/^Bearer\s+/i, '') ||
+    req.query.token ||
+    req.query.admin_token;
   const clientKey = clean(rawKey);
 
   if (!clientKey) {
