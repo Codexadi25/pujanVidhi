@@ -20,7 +20,8 @@ import WatermarkOverlay from './WatermarkOverlay';
  * 6. Responsive layout preserving existing classes (.wm, .en, .hi, .meta, .tip, .ill, .end)
  */
 export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefresh, onLogout, lang = 'hi' }) {
-  const [activeTab, setActiveTab] = useState('hi'); // 'hi' or 'en'
+  const isHindi = lang === 'hi';
+  const [activeTab, setActiveTab] = useState(isHindi ? 'hi' : 'en'); // 'hi' or 'en'
   const containerRef = useRef(null);
 
   const userName = user?.name || contentData?.name || 'Bhakt';
@@ -206,25 +207,29 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
       <div className="viewer-header">
         <div className="viewer-nav">
           <button className="viewer-back-btn" onClick={onBack}>
-            <ArrowLeft size={16} /> Back to Kit Store
+            <ArrowLeft size={16} /> {isHindi ? 'मुख्य स्टोर पर लौटें' : 'Back to Kit Store'}
           </button>
           <div className="viewer-badge">
             <Sparkles size={14} />
-            <span>{hasVideo ? 'Poojan Vidhi Video + Kit (Complete)' : 'Poojan Vidhi Kit (Digital Edition)'}</span>
+            <span>
+              {hasVideo
+                ? (isHindi ? 'पूजन विधि वीडियो + किट (संपूर्ण)' : 'Poojan Vidhi Video + Kit (Complete)')
+                : (isHindi ? 'पूजन विधि किट (डिजिटल)' : 'Poojan Vidhi Kit (Digital)')}
+            </span>
           </div>
         </div>
         
         <div className="viewer-user-meta">
           <div className="user-kalyanam">
             <span className="dot-active" />
-            <span>Kalyanam ID: <strong>{kalyanamId}</strong></span>
+            <span>{isHindi ? 'कल्याणम आईडी:' : 'Kalyanam ID:'} <strong>{kalyanamId}</strong></span>
           </div>
           <div className="user-owner">
-            <span>Blessed for: <strong>{userName}</strong></span>
+            <span>{isHindi ? 'संकल्पकर्ता:' : 'Blessed for:'} <strong>{userName}</strong></span>
           </div>
           {onLogout && (
-            <button className="viewer-logout-btn" onClick={onLogout} title="Log Out from Sacred Viewer">
-              <LogOut size={13} /> Logout
+            <button className="viewer-logout-btn" onClick={onLogout} title={isHindi ? 'लॉगआउट करें' : 'Log Out from Sacred Viewer'}>
+              <LogOut size={13} /> {isHindi ? 'लॉगआउट' : 'Logout'}
             </button>
           )}
         </div>
@@ -260,10 +265,10 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
             </div>
             <div>
               <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#8f211c', fontWeight: 700 }}>
-                Download Diwali Puja Vidhi PDF (Hindi)
+                {isHindi ? 'दिवाली पूजन विधि PDF डाउनलोड करें (हिंदी)' : 'Download Diwali Puja Vidhi PDF (Hindi)'}
               </h4>
               <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#5a4638' }}>
-                संपूर्ण दिवाली पूजन विधि, मंत्र एवं सामग्री सूची – ऑफ़लाइन अध्ययन या प्रिंट के लिए
+                {isHindi ? 'संपूर्ण दिवाली पूजन विधि, मंत्र एवं सामग्री सूची – ऑफ़लाइन अध्ययन या प्रिंट के लिए' : 'Complete Diwali Puja Vidhi, Mantras & Samagri checklist for offline reading or print'}
               </p>
             </div>
           </div>
@@ -291,10 +296,8 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
               cursor: 'pointer'
             }}
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download
+            <Download size={18} />
+            {isHindi ? 'PDF डाउनलोड करें' : 'Download PDF'}
           </a>
         </div>
 
@@ -305,11 +308,11 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
               <div className="video-title">
                 <Video size={20} className="gold-icon" />
                 <div>
-                  <h4>Step-by-Step Lakshmi-Ganesh Puja Video Guide</h4>
-                  <p>Complete visual walkthrough: Chowki Sthapana, Sankalp, Deepdaan &amp; Aarti</p>
+                  <h4>{isHindi ? 'क्रमबद्ध लक्ष्मी-गणेश पूजन वीडियो मार्गदर्शन' : 'Step-by-Step Lakshmi-Ganesh Puja Video Guide'}</h4>
+                  <p>{isHindi ? 'चौकी स्थापना, संकल्प, 14 दीपदान एवं आरती का संपूर्ण दृश्य मार्गदर्शन' : 'Complete visual walkthrough: Chowki Sthapana, Sankalp, Deepdaan & Aarti'}</p>
                 </div>
               </div>
-              <span className="badge-exclusive">Exclusive Video Access</span>
+              <span className="badge-exclusive">{isHindi ? 'विशेष वीडियो एक्सेस' : 'Exclusive Video Access'}</span>
             </div>
             <div className="video-frame-wrapper">
               <video
@@ -328,7 +331,7 @@ export default function ProtectedVidhiViewer({ user, contentData, onBack, onRefr
               </video>
             </div>
             <div className="video-tips-row">
-              <span>💡 <strong>Tip:</strong> Keep this video playing softly on your tablet or phone during the puja.</span>
+              <span>{isHindi ? '💡 सुझाव: पूजा के समय इस वीडियो को अपने मोबाइल या टैबलेट पर चलाकर रखें।' : '💡 Tip: Keep this video playing softly on your tablet or phone during the puja.'}</span>
             </div>
           </div>
         )}

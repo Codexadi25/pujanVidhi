@@ -211,6 +211,12 @@ export default function BuyPage({
       setStep('account');
     }
   }, [initialTab]);
+
+  useEffect(() => {
+    if (initialKit) {
+      setSelectedKit(initialKit);
+    }
+  }, [initialKit]);
   
   // Dynamic products from server
   const [dbProducts, setDbProducts] = useState([]);
@@ -455,24 +461,27 @@ export default function BuyPage({
         throw new Error(isHindi ? 'गेटवे से ऑर्डर आईडी प्राप्त नहीं हो सकी।' : 'Failed to receive Order ID from payment gateway.');
       }
 
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        throw new Error(isHindi ? 'रेज़रपे भुगतान गेटवे लोड नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जांचें।' : 'Failed to load Razorpay SDK. Please check your internet connection.');
-      }
+      const rzpKey = orderData.key || orderData.keyId || import.meta.env?.VITE_RAZORPAY_KEY_ID;
+      const isSimulated = Boolean(orderData.simulated || orderData.orderId?.startsWith('order_sim_') || !rzpKey || rzpKey === 'simulated_mode');
 
-      if (window.Razorpay && orderData.keyId) {
+      if (!isSimulated) {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded || !window.Razorpay) {
+          throw new Error(isHindi ? 'रेज़रपे भुगतान गेटवे लोड नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जांचें।' : 'Failed to load Razorpay SDK. Please check your internet connection.');
+        }
+
         const options = {
-          key: orderData.keyId,
+          key: rzpKey,
           amount: orderData.amount,
           currency: orderData.currency || 'INR',
           name: 'PoojanVidhi (पूजनविधि)',
-          description: currentKitInfo.name,
+          description: orderData.productTitle || currentKitInfo.name,
           image: '/images/PoojanVidhi_Logo.jpeg',
           order_id: orderData.orderId,
           prefill: {
-            name: targetUser.name || name,
-            email: targetUser.email || email,
-            contact: targetUser.phone || phone
+            name: targetUser.name || name || '',
+            email: targetUser.email || email || '',
+            contact: targetUser.phone || phone || ''
           },
           theme: {
             color: '#8f211c'
@@ -481,7 +490,7 @@ export default function BuyPage({
             try {
               setLoading(true);
               const verifyRes = await api.verifyPayment({
-                orderId: orderData.orderId,
+                orderId: response.razorpay_order_id || orderData.orderId,
                 paymentId: response.razorpay_payment_id,
                 signature: response.razorpay_signature,
                 plan: currentKitInfo.id,
@@ -674,20 +683,9 @@ export default function BuyPage({
       <div className="buy-content-wrapper">
         {/* If user is logged in and already paid, show friendly banner */}
         {user?.paid && (
-          <div style={{
-            background: 'linear-gradient(135deg, #fef4e8, #fdf0db)',
-            border: '2px solid #c69a43',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            boxShadow: '0 4px 12px rgba(143, 33, 28, 0.08)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <CheckCircle2 size={32} color="#8f211c" />
+          <div className="already-paid-top-banner">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }} className="banner-text-col">
+              <CheckCircle2 size={32} color="#8f211c" style={{ flexShrink: 0 }} />
               <div>
                 <strong style={{ color: '#8f211c', fontSize: '16px', display: 'block' }}>
                   {t.accessActive(user.name)}
@@ -709,6 +707,7 @@ export default function BuyPage({
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '8px',
                 whiteSpace: 'nowrap'
               }}
@@ -1000,14 +999,46 @@ export default function BuyPage({
                     <span>{t.selectedKitLabel}</span>
                     <strong>{currentKitInfo.name} — ₹{currentKitInfo.price}</strong>
                   </div>
-                  <div className="account-action-buttons">
-                    <button className="btn-proceed-to-payment" onClick={() => setStep('payment')}>
-                      {t.proceedToPayment} (₹{currentKitInfo.price}) <ArrowRight size={18} />
-                    </button>
-                    <button className="btn-switch-account" onClick={handleLogout}>
-                      {t.switchAccount}
-                    </button>
-                  </div>
+                  {user.paid && (user.hasVideoAccess || user.plan === currentKitInfo.id) ? (
+                    <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{
+                        background: '#e8f5e9',
+                        border: '1px solid #81c784',
+                        color: '#2e7d32',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <CheckCircle2 size={16} />
+                        <span>{isHindi ? 'इस किट का पावन एक्सेस आपके खाते में पहले से सक्रिय है!' : 'Access to this kit is already active in your account!'}</span>
+                      </div>
+                      <div className="account-action-buttons">
+                        <button
+                          className="btn-proceed-to-payment"
+                          onClick={() => { setStep('access'); loadContent(); }}
+                          style={{ background: '#8f211c' }}
+                        >
+                          <BookOpen size={18} /> {t.openVidhi} <ArrowRight size={18} />
+                        </button>
+                        <button className="btn-switch-account" onClick={handleLogout}>
+                          {t.switchAccount}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="account-action-buttons">
+                      <button className="btn-proceed-to-payment" onClick={() => setStep('payment')}>
+                        {t.proceedToPayment} (₹{currentKitInfo.price}) <ArrowRight size={18} />
+                      </button>
+                      <button className="btn-switch-account" onClick={handleLogout}>
+                        {t.switchAccount}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1056,18 +1087,33 @@ export default function BuyPage({
                   </div>
                 </div>
 
-                <div className="payment-modes-info">
-                  <span>{t.acceptedMethods}</span>
-                  <div className="payment-badges">
-                    <span className="pay-badge">UPI / QR</span>
-                    <span className="pay-badge">Google Pay</span>
-                    <span className="pay-badge">PhonePe</span>
-                    <span className="pay-badge">Paytm</span>
-                    <span className="pay-badge">Cards &amp; NetBanking</span>
+                {user?.paid && (user.hasVideoAccess || user.plan === currentKitInfo.id) ? (
+                  <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                    <div style={{
+                      background: '#e8f5e9',
+                      border: '1.5px solid #81c784',
+                      color: '#2e7d32',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      marginBottom: '14px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: 700
+                    }}>
+                      <CheckCircle2 size={20} color="#2e7d32" />
+                      <span>{isHindi ? 'आप इस किट के अधिकृत सदस्य हैं!' : 'You already have active access to this kit!'}</span>
+                    </div>
+                    <button
+                      className="btn-pay-now"
+                      onClick={() => { setStep('access'); loadContent(); }}
+                      style={{ background: '#8f211c' }}
+                    >
+                      <BookOpen size={18} /> {t.openVidhi} ➔
+                    </button>
                   </div>
-                </div>
-
-                {paymentSuccess ? (
+                ) : paymentSuccess ? (
                   <div className="payment-success-badge">
                     <CheckCircle2 size={24} />
                     <span>{t.paymentVerified}</span>

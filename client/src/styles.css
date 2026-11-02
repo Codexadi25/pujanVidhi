@@ -1155,46 +1155,97 @@
   .kits-grid-container {
     grid-template-columns: 1fr;
   }
-  .viewer-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
   .content-reader-card {
     padding: 24px 18px;
   }
 }
 
-/* High-Contrast Login Button & Mobile Stepper Fixes */
+/* High-Contrast Login Button */
 .login-header-btn:hover {
   background: var(--red, #8f211c) !important;
   color: #ffffff !important;
   border-color: var(--red, #8f211c) !important;
 }
 
-@media (max-width: 760px) {
+/* Mobile Stepper, Checkout & Viewer Layouts */
+@media (max-width: 768px) {
+  .buy-header {
+    padding: 8px 10px;
+  }
+  .buy-header-inner {
+    padding: 4px 0;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .buy-back-link {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+  }
+  .buy-brand {
+    gap: 6px;
+  }
+  .buy-brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .buy-brand span strong {
+    font-size: 14px !important;
+  }
+  .buy-brand span small {
+    display: none;
+  }
+  .language-switch {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+  .user-logged-pill {
+    padding: 4px 8px !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+  }
+  .user-name {
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .btn-access-tag {
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
   .login-header-btn {
     padding: 6px 10px !important;
     font-size: 12px !important;
   }
   .stepper-bar {
-    padding: 0 10px;
-    gap: 4px;
-    margin: 20px auto 10px;
+    padding: 0 6px;
+    gap: 3px;
+    margin: 16px auto 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .step-item {
     font-size: 11px;
     gap: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .step-num {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     font-size: 10px;
+    flex-shrink: 0;
   }
   .step-line {
-    width: 14px;
-    min-width: 10px;
-    margin: 0 4px;
+    width: 12px;
+    min-width: 8px;
+    margin: 0 2px;
+    flex-shrink: 0;
   }
   .auth-tabs {
     flex-direction: column;
@@ -1203,5 +1254,64 @@
     padding: 12px 14px;
     font-size: 13px;
     border-bottom: 1px solid #ebd9bf;
+  }
+  .already-paid-top-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .already-paid-top-banner .banner-text-col {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .already-paid-top-banner button {
+    width: 100%;
+    justify-content: center;
+  }
+  .viewer-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    padding: 12px 14px;
+  }
+  .viewer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .viewer-back-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .viewer-badge {
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  .viewer-user-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: rgba(143, 33, 28, 0.05);
+    border: 1px solid rgba(143, 33, 28, 0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+  .viewer-logout-btn {
+    margin-left: 0 !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap;
   }
 }

@@ -1,4 +1,4 @@
-  const bcrypt = require('bcryptjs'), crypto = require('crypto'), User = require('../models/User'),
+const bcrypt = require('bcryptjs'), crypto = require('crypto'), User = require('../models/User'),
   { signToken } = require('../utils/token'), fail = require('../utils/httpError'), asyncHandler = require('../utils/asyncHandler');
 const out = u => ({ token: signToken(u), user: u.toPublic() });
 exports.register = asyncHandler(async (req, res) => {
@@ -15,7 +15,14 @@ exports.register = asyncHandler(async (req, res) => {
   res.json(out(u));
 });
 exports.login = asyncHandler(async (req, res) => {
-  const u = await User.findOne({ email: (req.body.email || '').toLowerCase() });
+  const ident = (req.body.email || req.body.phone || req.body.identifier || '').trim();
+  const cleanPhone = ident.replace(/\D/g, '').slice(-10);
+  const u = await User.findOne({
+    $or: [
+      { email: ident.toLowerCase() },
+      ...(cleanPhone.length === 10 ? [{ phone: cleanPhone }] : [])
+    ]
+  });
   if (!u || !await bcrypt.compare(req.body.password || '', u.password)) throw fail(401, 'Invalid email or password');
   res.json(out(u));
 });
