@@ -233,7 +233,7 @@ export default function Page() {
         style={{ border: 0, width: "100%", cursor: "pointer" }}
         onClick={() => openBuy("video_kit")}
       >
-        {t.buy} {`(${prices.complete})`}
+        {t.buy} {`₹${prices.complete}`}
       </button>
     </div>
   );

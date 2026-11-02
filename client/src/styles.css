@@ -120,9 +120,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 600px;
-  margin: 30px auto 10px;
+  max-width: 620px;
+  width: 100%;
+  margin: 28px auto 12px;
   padding: 0 20px;
+  box-sizing: border-box;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.stepper-bar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 .step-item {
   display: flex;
@@ -1223,17 +1232,31 @@
     font-size: 12px !important;
   }
   .stepper-bar {
-    padding: 0 6px;
-    gap: 3px;
-    margin: 16px auto 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 0 16px;
+    gap: 2px;
+    margin: 16px auto 12px;
+    overflow: visible;
+    overflow-x: visible;
+    box-sizing: border-box;
+    width: 100%;
+    justify-content: space-between;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  .stepper-bar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
   .step-item {
     font-size: 11px;
     gap: 4px;
-    white-space: nowrap;
     flex-shrink: 0;
+    align-items: center;
+  }
+  .step-label {
+    font-size: 11px;
+    white-space: nowrap;
   }
   .step-num {
     width: 22px;
@@ -1242,10 +1265,12 @@
     flex-shrink: 0;
   }
   .step-line {
-    width: 12px;
-    min-width: 8px;
-    margin: 0 2px;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 6px;
+    max-width: 24px;
+    height: 2px;
+    margin: 0 3px;
+    background: #e2ceb8;
   }
   .auth-tabs {
     flex-direction: column;
@@ -1313,5 +1338,30 @@
     padding: 4px 8px !important;
     font-size: 11px !important;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 440px) {
+  .stepper-bar {
+    padding: 0 10px !important;
+    gap: 2px !important;
+  }
+  .step-item {
+    font-size: 10px !important;
+    gap: 3px !important;
+  }
+  .step-label {
+    font-size: 10px !important;
+    letter-spacing: -0.2px !important;
+  }
+  .step-num {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 9px !important;
+  }
+  .step-line {
+    min-width: 4px !important;
+    max-width: 12px !important;
+    margin: 0 2px !important;
   }
 }
