@@ -2,15 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Check, Sparkles, ArrowRight, ShieldCheck, Video, BookOpen, Clock } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function PricingSection({ t, onOpenBuy, lang = 'en' }) {
+export default function PricingSection({ t, onOpenBuy, lang = 'en', prices: propPrices }) {
   const [prices, setPrices] = useState({
-    essential: 21,
+    essential: propPrices?.essential || 21,
     essentialOrig: 199,
-    complete: 121,
-    completeOrig: 499
+    complete: propPrices?.complete || 51,
+    completeOrig: 299
   });
 
   useEffect(() => {
+    if (propPrices) {
+      setPrices(prev => ({
+        ...prev,
+        essential: propPrices.essential,
+        complete: propPrices.complete
+      }));
+      return;
+    }
     let isMounted = true;
     api.getProducts()
       .then(res => {
@@ -20,14 +28,14 @@ export default function PricingSection({ t, onOpenBuy, lang = 'en' }) {
           setPrices({
             essential: pDigital?.price || 21,
             essentialOrig: pDigital?.origPrice || 199,
-            complete: pVideo?.price || 121,
-            completeOrig: pVideo?.origPrice || 499
+            complete: pVideo?.price || 51,
+            completeOrig: pVideo?.origPrice || 299
           });
         }
       })
       .catch(() => {});
     return () => { isMounted = false; };
-  }, []);
+  }, [propPrices]);
 
   const isHindi = lang === 'hi';
 

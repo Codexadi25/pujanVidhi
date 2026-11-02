@@ -39,6 +39,7 @@ export default function Page() {
     grievanceOfficer: 'Aditya Sahu',
     entityName: 'पूजनविधि (PoojanVidhi / Kalyanam Sacred Services)'
   });
+  const [prices, setPrices] = useState({ essential: 21, complete: 51 });
 
   const handleSetLang = (newLang) => {
     setLang(newLang);
@@ -52,7 +53,7 @@ export default function Page() {
   // Continuous health heartbeat hook to keep Render warm
   useServerWakeup({ intervalMs: 180000 });
 
-  // Fetch dynamic platform contact & grievance settings from backend server
+  // Fetch dynamic platform contact & grievance settings and product prices from backend server
   useEffect(() => {
     let isMounted = true;
     api.getSettings()
@@ -64,6 +65,20 @@ export default function Page() {
       .catch(err => {
         console.warn('Could not load company settings from server:', err);
       });
+
+    api.getProducts()
+      .then(res => {
+        if (isMounted && res?.products && Array.isArray(res.products)) {
+          const pDigital = res.products.find(p => p.type === 'digital_kit' || (!p.hasVideoAccess && p.isActive));
+          const pVideo = res.products.find(p => p.type === 'video_kit' || (p.hasVideoAccess && p.isActive));
+          setPrices({
+            essential: pDigital?.price || 21,
+            complete: pVideo?.price || 51
+          });
+        }
+      })
+      .catch(() => {});
+
     return () => { isMounted = false; };
   }, []);
 
@@ -173,7 +188,7 @@ export default function Page() {
 
       <main>
         {/* Section 1: Hero */}
-        <Hero t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} />
+        <Hero t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} prices={prices} />
 
         {/* Section 2: Emotional Connection */}
         <FamilyBlessings t={t} />
@@ -182,7 +197,7 @@ export default function Page() {
         <Problem t={t} lang={lang} />
 
         {/* Section 4: Product Showcase */}
-        <Product t={t} onOpenBuy={(k) => openBuy(k || "kit")} lang={lang} />
+        <Product t={t} onOpenBuy={(k) => openBuy(k || "kit")} lang={lang} prices={prices} />
 
         {/* Section 5: How It Works */}
         <Steps t={t} lang={lang} />
@@ -191,13 +206,13 @@ export default function Page() {
         <GlobalFamilies t={t} lang={lang} />
 
         {/* Section 7: Product Preview */}
-        <Preview t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} />
+        <Preview t={t} onOpenBuy={() => openBuy("video_kit")} lang={lang} prices={prices} />
 
         {/* Section 8: Trust */}
-        <Trust t={t} lang={lang} />
+        <Trust t={t} lang={lang} prices={prices} />
 
         {/* Section 9: Pricing & Purchase */}
-        <PricingSection t={t} onOpenBuy={(k) => openBuy(k || "video_kit")} lang={lang} />
+        <PricingSection t={t} onOpenBuy={(k) => openBuy(k || "video_kit")} lang={lang} prices={prices} />
 
         {/* Section 10: Frequently Asked Questions */}
         <FAQ t={t} lang={lang} />
@@ -218,7 +233,7 @@ export default function Page() {
         style={{ border: 0, width: "100%", cursor: "pointer" }}
         onClick={() => openBuy("video_kit")}
       >
-        {t.buy} (₹121)
+        {t.buy} {`(${prices.complete})`}
       </button>
     </div>
   );

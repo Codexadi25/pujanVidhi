@@ -62,7 +62,7 @@ export const content = {
     planCompleteTitle: "Complete Video Guide",
     planCompleteBadge: "Recommended • Most Popular",
     planCompleteDesc: "The complete Pooja experience with full HD ritual video walkthrough and mantra audio.",
-    planCompleteCTA: "Get Complete Guide – ₹121",
+    planCompleteCTA: "Get Complete Guide – ₹51",
 
     // Section 10: FAQ
     faqKicker: "WE'RE HERE TO HELP",
@@ -148,7 +148,7 @@ export const content = {
     planCompleteTitle: "कम्प्लीट वीडियो गाइड (सम्पूर्ण किट)",
     planCompleteBadge: "सर्वाधिक लोकप्रिय एवं अनुशंसित",
     planCompleteDesc: "सम्पूर्ण पूजा का अनुभव — हर चरण का फुल एचडी वीडियो, मंत्र उच्चारण ऑडियो और आरती संग्रह सहित।",
-    planCompleteCTA: "कम्प्लीट वीडियो गाइड प्राप्त करें – ₹121",
+    planCompleteCTA: "कम्प्लीट वीडियो गाइड प्राप्त करें – ₹51",
 
     // Section 10: FAQ
     faqKicker: "हम आपकी सेवा में हैं",
@@ -208,8 +208,8 @@ export const steps = [
     "01",
     "Choose Your Pooja Guide",
     "अपनी पूजन मार्गदर्शिका चुनें",
-    "Select between the Essential Guide (₹21) or the Complete Video Guide (₹121) based on your family's needs.",
-    "अपनी आवश्यकतानुसार एसेंशियल गाइड (₹21) अथवा सम्पूर्ण वीडियो गाइड (₹121) का चयन करें।"
+    "Select between the Essential Guide (₹21) or the Complete Video Guide (₹51) based on your family's needs.",
+    "अपनी आवश्यकतानुसार एसेंशियल गाइड (₹21) अथवा सम्पूर्ण वीडियो गाइड (₹51) का चयन करें।"
   ],
   [
     "02",

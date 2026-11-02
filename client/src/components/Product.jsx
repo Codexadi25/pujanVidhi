@@ -23,11 +23,15 @@ const actualFeatures = [
   [Smartphone, "Instant Cloud Access on Mobile, Tablet & Laptop (Perpetual)", "मोबाइल, टैबलेट एवं लैपटॉप पर आजीवन तुरंत एक्सेस"]
 ];
 
-export default function Product({ t, onOpenBuy, lang = 'hi' }) {
+export default function Product({ t, onOpenBuy, lang = 'hi', prices: propPrices }) {
   const isHindi = lang === 'hi';
-  const [prices, setPrices] = useState({ essential: 21, complete: 121 });
+  const [prices, setPrices] = useState(propPrices || { essential: 21, complete: 51 });
 
   useEffect(() => {
+    if (propPrices) {
+      setPrices(propPrices);
+      return;
+    }
     let isMounted = true;
     api.getProducts()
       .then(res => {
@@ -36,13 +40,13 @@ export default function Product({ t, onOpenBuy, lang = 'hi' }) {
           const pVideo = res.products.find(p => p.type === 'video_kit' || (p.hasVideoAccess && p.isActive));
           setPrices({
             essential: pDigital?.price || 21,
-            complete: pVideo?.price || 121
+            complete: pVideo?.price || 51
           });
         }
       })
       .catch(() => {});
     return () => { isMounted = false; };
-  }, []);
+  }, [propPrices]);
 
   return (
     <section className="product-section section" id="product">

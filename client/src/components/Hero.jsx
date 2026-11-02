@@ -1,8 +1,10 @@
 import React from 'react';
 import { ArrowDown, Sparkles, ArrowRight, ShieldCheck, Zap, Video, CheckCircle2 } from "lucide-react";
 
-export default function Hero({ t, onOpenBuy, lang = 'hi' }) {
+export default function Hero({ t, onOpenBuy, lang = 'hi', prices }) {
   const isHindi = lang === 'hi';
+  const pEss = prices?.essential || 21;
+  const pComp = prices?.complete || 51;
   return (
     <section className="hero" id="home">
       <div className="hero-pattern"/>
@@ -99,7 +101,7 @@ export default function Hero({ t, onOpenBuy, lang = 'hi' }) {
               }}
               onClick={() => onOpenBuy && onOpenBuy('video_kit')}
             >
-              {t.primary} (₹21 / ₹121) <ArrowRight size={17}/>
+              {t.primary} (₹{pEss} / ₹{pComp}) <ArrowRight size={17}/>
             </button>
             <a className="button button-outline" href="#product">
               {t.secondary}

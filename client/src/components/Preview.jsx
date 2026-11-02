@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FileText, PlayCircle, Eye, ArrowRight, X, CheckCircle2, Sparkles, BookOpen } from "lucide-react";
 
-export default function Preview({ t, onOpenBuy }) {
+export default function Preview({ t, onOpenBuy, lang = 'hi', prices }) {
   const [activeTab, setActiveTab] = useState('chowki');
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const videoPrice = prices?.complete || 51;
 
   const previewSnippets = {
     chowki: {
@@ -241,7 +242,7 @@ export default function Preview({ t, onOpenBuy }) {
                 style={{ cursor: "pointer", padding: "8px 14px", fontSize: "12px" }}
                 onClick={() => onOpenBuy && onOpenBuy('video_kit')}
               >
-                Get Video Guide (₹121) →
+                Get Video Guide (₹{videoPrice}) →
               </button>
             </div>
           </div>
@@ -311,7 +312,7 @@ export default function Preview({ t, onOpenBuy }) {
                 onOpenBuy && onOpenBuy('video_kit');
               }}
             >
-              Unlock Complete Video Guide (₹121) <ArrowRight size={16}/>
+              Unlock Complete Video Guide (₹{videoPrice}) <ArrowRight size={16}/>
             </button>
           </div>
         </div>

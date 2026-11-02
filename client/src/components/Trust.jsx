@@ -1,8 +1,10 @@
 import React from 'react';
 import { BookMarked, BadgeCheck, ShieldCheck } from "lucide-react";
 
-export default function Trust({ t, lang = 'hi' }) {
+export default function Trust({ t, lang = 'hi', prices }) {
   const isHindi = lang === 'hi';
+  const pEss = prices?.essential || 21;
+  const pComp = prices?.complete || 51;
   return (
     <section className="trust-section section" id="trust">
       <div className="section-heading">
@@ -37,8 +39,8 @@ export default function Trust({ t, lang = 'hi' }) {
           <h3>{isHindi ? "पारदर्शी, प्रामाणिक एवं सम्मानजनक" : "Transparent & Respectful"}</h3>
           <p>
             {isHindi
-              ? "ईमानदार एकमुश्त मूल्य (₹२१ / ₹१२१), सभी मोबाइल व कंप्यूटर पर तुरंत डिलीवरी, कोई छुपा हुआ शुल्क नहीं, एवं व्हाट्सएप व ईमेल पर सदैव भक्त सहायता।"
-              : "One-time honest pricing (₹21 / ₹121), instant digital delivery on all your devices, zero subscriptions, and friendly WhatsApp & email devotee assistance."}
+              ? `ईमानदार एकमुश्त मूल्य (₹${pEss} / ₹${pComp}), सभी मोबाइल व कंप्यूटर पर तुरंत डिलीवरी, कोई छुपा हुआ शुल्क नहीं, एवं व्हाट्सएप व ईमेल पर सदैव भक्त सहायता।`
+              : `One-time honest pricing (₹${pEss} / ₹${pComp}), instant digital delivery on all your devices, zero subscriptions, and friendly WhatsApp & email devotee assistance.`}
           </p>
         </div>
       </div>
